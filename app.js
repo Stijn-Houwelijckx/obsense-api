@@ -12,6 +12,9 @@ const connection = config.get("mongodb");
 console.log(`Connecting to ${connection}`);
 mongoose.connect(connection);
 
+// Importing the routes
+var userRouter = require('./routes/api/v1/users');
+
 var app = express();
 
 // view engine setup
@@ -25,6 +28,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Using the routes
+app.use('/api/v1/users', userRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
