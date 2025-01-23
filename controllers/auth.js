@@ -137,7 +137,81 @@ const login = async (req, res) => {
   }
 };
 
+// Change password controller
+const changePassword = async (req, res) => {
+  try {
+    // Get user input
+    const { oldPassword, newPassword } = req.body.user;
+
+    // Check if user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorized",
+      });
+    }
+
+    // Ensure all fields are present
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "Please fill in all fields",
+      });
+    }
+
+    // Get user
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Verify old password
+    await user.authenticate(oldPassword).then((result) => {
+      if (!result) {
+        return res.status(400).json({
+          status: "error",
+          message: "Old password is incorrect",
+        });
+      }
+    });
+
+    // Check if old password is the same as new password
+    if (oldPassword === newPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "New password must be different from old password",
+      });
+    }
+
+    // Check if password is strong enough
+    if (newPassword.length < 5) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password should beat least 5 characters long",
+      });
+    }
+
+    // Change password
+    await user.changePassword(oldPassword, newPassword).then(() => {
+      res.status(200).json({
+        status: "success",
+        message: "Password changed successfully",
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   signup,
   login,
+  changePassword,
 };
