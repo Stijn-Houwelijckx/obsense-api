@@ -7,7 +7,7 @@ require("dotenv").config();
 const signup = async (req, res) => {
   try {
     // Get user input
-    const { firstname, lastname, email, password } = req.body.user;
+    const { firstname, lastname, artistname, email, password } = req.body.user;
 
     // Ensure all fields are present
     if (!firstname || !lastname || !email || !password) {
@@ -24,6 +24,17 @@ const signup = async (req, res) => {
         status: "error",
         message: "User already exists",
       });
+    }
+
+    // Check if artistname is unique
+    if (artistname) {
+      const existingArtist = await User.findOne({ artistname: artistname });
+      if (existingArtist) {
+        return res.status(400).json({
+          status: "error",
+          message: "Artistname already exists",
+        });
+      }
     }
 
     // Check if password is strong enough
@@ -47,6 +58,7 @@ const signup = async (req, res) => {
     const user = new User({
       firstname: firstname,
       lastname: lastname,
+      artistname: artistname,
       email: email,
     });
 
