@@ -81,6 +81,8 @@ const signup = async (req, res) => {
           status: "success",
           data: {
             token: token,
+            userId: user._id,
+            isArtist: user.isArtist,
           },
         });
       })
@@ -137,6 +139,8 @@ const login = async (req, res) => {
         status: "success",
         data: {
           token: token,
+          userId: user.user._id,
+          isArtist: user.user.isArtist,
         },
       });
     });
