@@ -65,18 +65,20 @@ const signup = async (req, res) => {
     await user.setPassword(password);
 
     // Save user to the database
-    await user.save().then((user) => {
-      let token = jwt.sign({ uid: user._id }, process.env.JWT_SECRET);
+    await user
+      .save()
+      .then((user) => {
+        let token = jwt.sign({ uid: user._id }, process.env.JWT_SECRET);
 
-      res.status(201).json({
-        status: "success",
-        data: {
-          _id: user._id,
-          isArtist: user.isArtist,
-          token: token
-        },
-      });
-    })
+        res.status(201).json({
+          status: "success",
+          data: {
+            _id: user._id,
+            isArtist: user.isArtist,
+            token: token,
+          },
+        });
+      })
       .catch((err) => {
         res.status(400).json({
           status: "error",
@@ -119,14 +121,14 @@ const login = async (req, res) => {
 
       // Generate token
       let token = jwt.sign({ uid: user.user._id }, process.env.JWT_SECRET);
-      
+
       // If user is found
       res.status(200).json({
         status: "success",
         data: {
-          _id: user._id,
-          isArtist: user.isArtist,
-          token: token
+          _id: user.user._id,
+          isArtist: user.user.isArtist,
+          token: token,
         },
       });
     });
