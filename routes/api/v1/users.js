@@ -8,10 +8,6 @@ router.get("/", userController.index);
 
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
-router.put(
-  "/change-password",
-  passport.authenticate("jwt", { session: false }),
-  authController.changePassword
-);
+router.put("/change-password", passport.authenticate("jwt", { session: false }), authController.changePassword);
 
 module.exports = router;

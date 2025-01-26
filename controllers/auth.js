@@ -1,7 +1,6 @@
 const User = require("../models/api/v1/User");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-// const config = require("config");
 
 // Signup controller
 const signup = async (req, res) => {
@@ -66,26 +65,18 @@ const signup = async (req, res) => {
     await user.setPassword(password);
 
     // Save user to the database
-    await user
-      .save()
-      .then((user) => {
-        let token = jwt.sign(
-          {
-            uid: user._id,
-            email: user.email,
-          },
-          process.env.JWT_SECRET
-        );
+    await user.save().then((user) => {
+      let token = jwt.sign({ uid: user._id }, process.env.JWT_SECRET);
 
-        res.status(201).json({
-          status: "success",
-          data: {
-            token: token,
-            userId: user._id,
-            isArtist: user.isArtist,
-          },
-        });
-      })
+      res.status(201).json({
+        status: "success",
+        data: {
+          _id: user._id,
+          isArtist: user.isArtist,
+          token: token
+        },
+      });
+    })
       .catch((err) => {
         res.status(400).json({
           status: "error",
@@ -127,20 +118,15 @@ const login = async (req, res) => {
       }
 
       // Generate token
-      let token = jwt.sign(
-        {
-          uid: user.user._id,
-          email: user.user.email,
-        },
-        process.env.JWT_SECRET
-      );
+      let token = jwt.sign({ uid: user.user._id }, process.env.JWT_SECRET);
+      
       // If user is found
       res.status(200).json({
         status: "success",
         data: {
-          token: token,
-          userId: user.user._id,
-          isArtist: user.user.isArtist,
+          _id: user._id,
+          isArtist: user.isArtist,
+          token: token
         },
       });
     });
@@ -175,7 +161,7 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Get user
+    // Get user with userId from decoded token
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({

@@ -3,18 +3,17 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-require("dotenv").config();
-// var config = require("config");
 var cors = require("cors");
+require("dotenv").config();
 
-// Connecting to the database
+// connecting to the database
 const mongoose = require("mongoose");
 const connection = process.env.DATABASE_CONN;
 console.log(`Connecting to ${connection}`);
 mongoose.connect(connection);
 
-// Importing the routes
-const userRouter = require("./routes/api/v1/users");
+// importing the routes
+const userRoute = require("./routes/api/v1/users");
 
 var app = express();
 
@@ -30,8 +29,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Using the routes
-app.use("/api/v1/users", userRouter);
+// using the routes
+app.use("/api/v1/users", userRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
