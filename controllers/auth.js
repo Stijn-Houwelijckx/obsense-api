@@ -6,10 +6,10 @@ require("dotenv").config();
 const signup = async (req, res) => {
   try {
     // Get user input
-    const { firstName, lastName, artistName, email, password } = req.body.user;
+    const { firstName, lastName, username, email, password } = req.body.user;
 
     // Ensure all fields are present
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName || !lastName || !username || !email || !password) {
       return res.status(400).json({
         status: "error",
         message: "Please fill in all fields",
@@ -26,8 +26,8 @@ const signup = async (req, res) => {
     }
 
     // Check if artistName is unique
-    if (artistName) {
-      const existingArtist = await User.findOne({ artistName: artistName });
+    if (username) {
+      const existingArtist = await User.findOne({ username: username });
       if (existingArtist) {
         return res.status(400).json({
           status: "error",
@@ -57,7 +57,7 @@ const signup = async (req, res) => {
     const user = new User({
       firstName: firstName,
       lastName: lastName,
-      artistName: artistName,
+      username: username,
       email: email,
     });
 
