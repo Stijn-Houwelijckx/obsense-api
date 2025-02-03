@@ -11,8 +11,10 @@ const signup = async (req, res) => {
     // Ensure all fields are present
     if (!firstName || !lastName || !username || !email || !password) {
       return res.status(400).json({
-        status: "error",
-        message: "Please fill in all fields",
+        status: "fail",
+        data: {
+          message: "Please fill in all fields",
+        },
       });
     }
 
@@ -20,18 +22,22 @@ const signup = async (req, res) => {
     const existingUser = await User.findOne({ email: email });
     if (existingUser) {
       return res.status(400).json({
-        status: "error",
-        message: "User already exists",
+        status: "fail",
+        data: {
+          message: "User already exists",
+        },
       });
     }
 
     // Check if artistName is unique
     if (username) {
-      const existingArtist = await User.findOne({ username: username });
-      if (existingArtist) {
+      const existingUser = await User.findOne({ username: username });
+      if (existingUser) {
         return res.status(400).json({
-          status: "error",
-          message: "artistName already exists",
+          status: "fail",
+          data: {
+            message: "username already exists",
+          },
         });
       }
     }
@@ -39,8 +45,10 @@ const signup = async (req, res) => {
     // Check if password is strong enough
     if (password.length < 5) {
       return res.status(400).json({
-        status: "error",
-        message: "Password should be at least 5 characters long",
+        status: "fail",
+        data: {
+          message: "Password should be at least 5 characters long",
+        },
       });
     }
 
@@ -48,8 +56,10 @@ const signup = async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
-        status: "error",
-        message: "Please enter a valid email",
+        status: "fail",
+        data: {
+          message: "Please enter a valid email",
+        },
       });
     }
 
@@ -80,17 +90,23 @@ const signup = async (req, res) => {
         });
       })
       .catch((err) => {
-        res.status(400).json({
+        res.status(500).json({
           status: "error",
           message: "Could not create user",
-          error: err.message,
+          data: {
+            code: 500,
+            details: err.message,
+          },
         });
       });
   } catch (err) {
     res.status(500).json({
       status: "error",
       message: "Server error",
-      error: err.message,
+      data: {
+        code: 500,
+        details: err.message,
+      },
     });
   }
 };
@@ -104,8 +120,10 @@ const login = async (req, res) => {
     // Ensure all fields are present
     if (!email || !password) {
       return res.status(400).json({
-        status: "error",
-        message: "Please fill in all fields",
+        status: "fail",
+        data: {
+          message: "Please fill in all fields",
+        },
       });
     }
 
@@ -114,8 +132,10 @@ const login = async (req, res) => {
       // If user is not found
       if (user.user === false) {
         return res.status(400).json({
-          status: "failed",
-          message: "Login failed",
+          status: "fail",
+          data: {
+            message: "Login failed",
+          },
         });
       }
 
@@ -136,7 +156,10 @@ const login = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Server error",
-      error: err.message,
+      data: {
+        code: 500,
+        details: err.message,
+      },
     });
   }
 };
@@ -150,16 +173,20 @@ const changePassword = async (req, res) => {
     // Check if user is authenticated
     if (!req.user) {
       return res.status(401).json({
-        status: "error",
-        message: "Unauthorized",
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
       });
     }
 
     // Ensure all fields are present
     if (!oldPassword || !newPassword) {
       return res.status(400).json({
-        status: "error",
-        message: "Please fill in all fields",
+        status: "fail",
+        data: {
+          message: "Please fill in all fields",
+        },
       });
     }
 
@@ -167,8 +194,10 @@ const changePassword = async (req, res) => {
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({
-        status: "error",
-        message: "User not found",
+        status: "fail",
+        data: {
+          message: "User not found",
+        },
       });
     }
 
@@ -176,8 +205,10 @@ const changePassword = async (req, res) => {
     await user.authenticate(oldPassword).then((result) => {
       if (!result) {
         return res.status(400).json({
-          status: "error",
-          message: "Old password is incorrect",
+          status: "fail",
+          data: {
+            message: "Old password is incorrect",
+          },
         });
       }
     });
@@ -185,16 +216,20 @@ const changePassword = async (req, res) => {
     // Check if old password is the same as new password
     if (oldPassword === newPassword) {
       return res.status(400).json({
-        status: "error",
-        message: "New password must be different from old password",
+        status: "fail",
+        data: {
+          message: "New password must be different from old password",
+        },
       });
     }
 
     // Check if password is strong enough
     if (newPassword.length < 5) {
       return res.status(400).json({
-        status: "error",
-        message: "Password should beat least 5 characters long",
+        status: "fail",
+        data: {
+          message: "Password should be at least 5 characters long",
+        },
       });
     }
 
@@ -209,7 +244,10 @@ const changePassword = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Server error",
-      error: err.message,
+      data: {
+        code: 500,
+        details: err.message,
+      },
     });
   }
 };
