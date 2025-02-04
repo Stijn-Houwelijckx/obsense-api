@@ -1,5 +1,50 @@
 const User = require("../../../models/api/v1/User");
 
+// Functions to hanbdle requests for the currently authenticated user
+
+// Get the currently logged-in user's profile data
+const getCurrentUser = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    // Fetch the user data, excluding sensitive fields
+    const user = await User.findById(req.user._id) // Get the user ID from the request object
+      .select("firstName lastName username email isArtist profilePicture") // Explicitly select fields
+      .lean(); // Use lean() for performance if we don't need Mongoose documents
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user: user,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Unable to fetch current user",
+      error: err.message,
+    });
+  }
+};
+
+// ================================================================================================= //
+
+// Functions to handle requests for all users
+
 // Get all users
 const index = async (req, res) => {
   try {
@@ -30,5 +75,9 @@ const index = async (req, res) => {
 };
 
 module.exports = {
+  // Export funtions for currently authenticated users
+  getCurrentUser,
+
+  // Export functions for all users
   index,
 };
