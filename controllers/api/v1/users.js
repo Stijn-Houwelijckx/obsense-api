@@ -22,7 +22,9 @@ const getCurrentUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         status: "fail",
-        message: "User not found",
+        data: {
+          message: "User not found",
+        },
       });
     }
 
