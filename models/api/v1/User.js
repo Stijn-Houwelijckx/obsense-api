@@ -10,10 +10,10 @@ const UserSchema = new Schema(
     email: { type: String, required: true, unique: true },
     isArtist: { type: Boolean, default: false },
     profilePicture: {
-      fileName: { type: String },
+      fileName: { type: String, default: "Default" },
       filePath: { type: String },
-      fileType: { type: String },
-      fileSize: { type: Number },
+      fileType: { type: String, default: ".jpg" },
+      fileSize: { type: Number, default: 8273 },
     },
   },
   { timestamps: true } // Automatically add createdAt and updatedAt fields
