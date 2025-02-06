@@ -14,6 +14,7 @@ mongoose.connect(connection);
 
 // importing the routes
 const userRoute = require("./routes/api/v1/users");
+const collectionRoute = require("./routes/api/v1/collections");
 
 var app = express();
 
@@ -31,6 +32,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // using the routes
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/collections", collectionRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
