@@ -10,7 +10,7 @@ const CollectionSchema = new Schema(
     price: { type: Number, required: true },
     coverImage: {
       fileName: { type: String, required: true },
-      filePath: { type: String, default: null },
+      filePath: { type: String, required: true },
       fileType: { type: String, required: true },
       fileSize: { type: Number, required: true },
     },
