@@ -1,7 +1,6 @@
 const Collection = require("../../../models/api/v1/Collection");
 const User = require("../../../models/api/v1/User");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
-const validateFile = require("../../../middleware/validateFile");
 
 // Controller to create a new collection
 const create = async (req, res) => {
