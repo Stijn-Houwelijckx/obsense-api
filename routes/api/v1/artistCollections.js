@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("../../../passport/passport");
-const collectionController = require("../../../controllers/api/v1/collections");
+const artistCollectionController = require("../../../controllers/api/v1/artistCollections");
 const validateFile = require("../../../middleware/validateFile"); // For file validation
 const multer = require("multer");
 
@@ -17,7 +17,7 @@ router.post(
     1 * 1024 * 1024,
     "coverImage"
   ), // File validation for cover image (1MB)
-  collectionController.create // Controller to handle collection creation
+  artistCollectionController.create // Controller to handle collection creation
 );
 
 module.exports = router;
