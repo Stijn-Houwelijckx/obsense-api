@@ -8,6 +8,7 @@ const multer = require("multer");
 // Initialize multer for file handling (must match field name used in the frontend form)
 const upload = multer();
 
+// Route to create a new collection
 router.post(
   "/",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
@@ -18,6 +19,13 @@ router.post(
     "coverImage"
   ), // File validation for cover image (1MB)
   artistCollectionController.create // Controller to handle collection creation
+);
+
+// Route to get collections for the logged-in artist
+router.get(
+  "/",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  artistCollectionController.index // Controller to get the artist's collections
 );
 
 module.exports = router;

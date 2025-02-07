@@ -145,6 +145,60 @@ const create = async (req, res) => {
   }
 };
 
+// Get collections of the currently logged-in artist
+const index = async (req, res) => {
+  try {
+    // Check if the user is authenticated and is an artist
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = await User.findById(req.user._id);
+    if (!currentUser || !currentUser.isArtist) {
+      return res.status(403).json({
+        status: "fail",
+        data: {
+          message: "Forbidden: Only artists can access their collections.",
+        },
+      });
+    }
+
+    // Find collections for the artist and select only necessary fields
+    const collections = await Collection.find({ createdBy: req.user._id })
+      .select("_id type title coverImage isPublished isActive location") // Select necessary fields
+      .sort({ createdAt: -1 }); // Optional: Sort by creation date (newest first)
+
+    if (!collections || collections.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "No collections found for this artist.",
+        },
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: collections,
+    });
+  } catch (error) {
+    console.error("Error fetching artist collections:", error);
+    return res.status(500).json({
+      status: "fail",
+      data: {
+        message: "Error fetching collections.",
+      },
+    });
+  }
+};
+
 module.exports = {
   create,
+  index,
 };
