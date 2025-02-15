@@ -23,9 +23,19 @@ const CollectionSchema = new Schema(
     ], // Placed 3D objects
     maxObjects: { type: Number, default: 10 },
     timesBought: { type: Number, default: 0 },
-    likes: { type: Number, default: 0 },
-    views: { type: Number, default: 0 },
-    rating: { type: Number, min: 0, max: 5, default: 0 },
+    likes: { type: Schema.Types.ObjectId, ref: "User", default: [] },
+    views: { type: Schema.Types.ObjectId, ref: "User", default: [] },
+    ratings: [
+      {
+        user: { type: Schema.Types.ObjectId, ref: "User" },
+        rating: {
+          type: Number,
+          min: 0,
+          max: 5,
+          default: 0,
+        },
+      },
+    ],
     genres: [{ type: Schema.Types.ObjectId, ref: "Genre", default: [] }],
     location: {
       lat: { type: Number, default: null },
