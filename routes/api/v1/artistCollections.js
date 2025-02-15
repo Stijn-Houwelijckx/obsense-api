@@ -28,4 +28,11 @@ router.get(
   artistCollectionController.index // Controller to get the artist's collections
 );
 
+// Route to get a single collection by ID
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  artistCollectionController.show // Controller to get a single collection
+);
+
 module.exports = router;

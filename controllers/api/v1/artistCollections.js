@@ -198,7 +198,70 @@ const index = async (req, res) => {
   }
 };
 
+// Get a specific collection by ID for the currently logged-in artist
+const show = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
+      return res.status(403).json({
+        status: "fail",
+        data: {
+          message: "Forbidden: Only artists can access their collections.",
+        },
+      });
+    }
+
+    const { id } = req.params;
+
+    // Find the collection by ID and ensure it belongs to the current user
+    const collection = await Collection.findOne({
+      _id: id,
+      createdBy: req.user._id,
+    })
+      .populate("createdBy", "username") // Only populate 'username' field in createdBy
+      .populate("objects") // Populate other fields as needed
+      .populate("genres")
+      .populate("likes")
+      .populate("views")
+      .populate("ratings.user");
+
+    if (!collection) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Collection not found or access denied.",
+        },
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: collection,
+    });
+  } catch (error) {
+    console.error("Error fetching collection:", error);
+    return res.status(500).json({
+      status: "fail",
+      data: {
+        message: "Error fetching collection.",
+      },
+    });
+  }
+};
+
 module.exports = {
   create,
   index,
+  show,
 };
