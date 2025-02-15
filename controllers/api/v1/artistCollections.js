@@ -15,7 +15,7 @@ const create = async (req, res) => {
       });
     }
 
-    const currentUser = await User.findById(req.user._id);
+    const currentUser = req.user;
     if (!currentUser.isArtist) {
       return res.status(403).json({
         status: "fail",
@@ -159,7 +159,7 @@ const index = async (req, res) => {
     }
 
     // Find the user from the database to check if they are an artist
-    const currentUser = await User.findById(req.user._id);
+    const currentUser = req.user;
     if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
         status: "fail",
