@@ -47,10 +47,15 @@ const uploadToCloudinary = async (filePath, fileType, originalFileName) => {
 
     fs.unlinkSync(filePath); // Remove file from server after upload
 
+    // console.log("Cloudinary upload result:");
+    // console.log(result);
+
     return {
       url: result.secure_url,
       public_id: result.public_id,
-      format: result.format,
+      format: result.format
+        ? result.format
+        : path.extname(originalFileName).slice(1),
       bytes: result.bytes,
     };
   } catch (error) {
