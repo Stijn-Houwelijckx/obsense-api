@@ -15,12 +15,7 @@ const CollectionSchema = new Schema(
       fileSize: { type: Number, required: true },
     },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    objects: [
-      { type: Schema.Types.ObjectId, ref: "CollectionObject", default: [] },
-    ], // 3D objects in the collection
-    placedObjects: [
-      { type: Schema.Types.ObjectId, ref: "PlacedObject", default: [] },
-    ], // Placed 3D objects
+    objects: [{ type: Schema.Types.ObjectId, ref: "Object", default: [] }], // 3D objects in the collection
     maxObjects: { type: Number, default: 10 },
     timesBought: { type: Number, default: 0 },
     likes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
