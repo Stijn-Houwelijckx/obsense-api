@@ -15,6 +15,9 @@ mongoose.connect(connection);
 // importing the routes
 const userRoute = require("./routes/api/v1/users");
 const artistCollectionRoute = require("./routes/api/v1/artistCollections");
+const objectRoute = require("./routes/api/v1/objects");
+const placedObjectRoute = require("./routes/api/v1/placedObjects");
+const genreRoute = require("./routes/api/v1/genres");
 
 var app = express();
 
@@ -33,6 +36,9 @@ app.use(express.static(path.join(__dirname, "public")));
 // using the routes
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/artist/collections", artistCollectionRoute);
+app.use("/api/v1/objects", objectRoute);
+app.use("/api/v1/placedObjects", placedObjectRoute);
+app.use("/api/v1/genres", genreRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
