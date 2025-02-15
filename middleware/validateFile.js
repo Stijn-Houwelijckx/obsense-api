@@ -26,10 +26,13 @@ const validateFile = (
           return cb(null, true);
         }
 
+        const allowedExtStr = allowedExtensions
+          .toString()
+          .replace(/\\|\$|\/|\^|\|/g, "")
+          .replace(/\.\*/g, "")
+          .replace(/i/g, ""); // Remove 'i' from the string
         return cb(
-          new Error(
-            `Invalid file type. Allowed: ${allowedMimeTypes.join(", ")}`
-          ),
+          new Error(`Invalid file type. Allowed: ${allowedExtStr}`),
           false
         );
       },
