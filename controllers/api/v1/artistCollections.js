@@ -37,9 +37,11 @@ const create = async (req, res) => {
     }
 
     // Collecting user input for the collection creation
-    let { type } = req.body;
+    const data = JSON.parse(req.body.collection); // Parse the JSON data because it's a string because of FormData
+
+    let { type } = data.collection;
     type = type.toLowerCase(); // Convert to lowercase for consistency
-    const { title, description, city, price, genres } = req.body;
+    const { title, description, city, price, genres } = data.collection;
 
     if (!type || !title || !city || !price) {
       return res.status(400).json({
@@ -186,7 +188,7 @@ const index = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      data: collections,
+      data: { collections: collections },
     });
   } catch (error) {
     console.error("Error fetching artist collections:", error);
@@ -248,7 +250,7 @@ const show = async (req, res) => {
 
     return res.status(200).json({
       status: "success",
-      data: collection,
+      data: { collection: collection },
     });
   } catch (error) {
     console.error("Error fetching collection:", error);
@@ -286,7 +288,7 @@ const addObjects = async (req, res) => {
     }
 
     const collectionId = req.params.id;
-    const { objectIds } = req.body;
+    const { objectIds } = req.body.objects;
 
     // Ensure objectIds is an array
     if (!Array.isArray(objectIds) || objectIds.length === 0) {
@@ -347,7 +349,7 @@ const addObjects = async (req, res) => {
     return res.status(200).json({
       status: "success",
       data: {
-        collection,
+        collection: collection,
       },
     });
   } catch (error) {

@@ -34,7 +34,9 @@ const create = async (req, res) => {
     }
 
     // Collecting user input for the object creation
-    const { title, description } = req.body;
+    const data = JSON.parse(req.body.object);
+
+    const { title, description } = data.object;
 
     if (!title) {
       return res.status(400).json({
