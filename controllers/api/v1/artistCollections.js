@@ -1,4 +1,5 @@
 const Collection = require("../../../models/api/v1/Collection");
+const Object = require("../../../models/api/v1/Object");
 const User = require("../../../models/api/v1/User");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
 
@@ -260,8 +261,110 @@ const show = async (req, res) => {
   }
 };
 
+// Add object(s) to collection
+const addObjects = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
+      return res.status(403).json({
+        status: "fail",
+        data: {
+          message: "Forbidden: Only artists can add objects to collections.",
+        },
+      });
+    }
+
+    const collectionId = req.params.id;
+    const { objectIds } = req.body;
+
+    // Ensure objectIds is an array
+    if (!Array.isArray(objectIds) || objectIds.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "Please provide an array of object IDs.",
+        },
+      });
+    }
+
+    // Find the collection by ID and ensure it belongs to the current user
+    const collection = await Collection.findOne({
+      _id: collectionId,
+      createdBy: req.user._id,
+    });
+
+    if (!collection) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Collection not found or access denied.",
+        },
+      });
+    }
+
+    // Check if the collection has reached its maxObjects limit
+    if (collection.objects.length + objectIds.length > collection.maxObjects) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message:
+            "Maximum objects reached for this collection. Buy more slots.",
+        },
+      });
+    }
+
+    // Remove duplicates from the objectIds array
+    const uniqueObjectIds = objectIds.filter(
+      (id) => !collection.objects.includes(id)
+    );
+
+    // If there are no unique IDs to add, return a message
+    if (uniqueObjectIds.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message:
+            "No new objects to add. All objects are already in the collection.",
+        },
+      });
+    }
+
+    // Add the unique objects to the collection
+    collection.objects.push(...uniqueObjectIds);
+    await collection.save();
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        collection,
+      },
+    });
+  } catch (error) {
+    console.error("Error adding objects to collection:", error);
+    return res.status(500).json({
+      status: "fail",
+      data: {
+        message: "Error adding objects to collection.",
+      },
+    });
+  }
+};
+
 module.exports = {
   create,
   index,
   show,
+
+  addObjects,
 };
