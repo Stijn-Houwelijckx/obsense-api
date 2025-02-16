@@ -18,8 +18,8 @@ const CollectionSchema = new Schema(
     objects: [{ type: Schema.Types.ObjectId, ref: "Object", default: [] }], // 3D objects in the collection
     maxObjects: { type: Number, default: 10 },
     timesBought: { type: Number, default: 0 },
-    likes: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
-    views: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    likes: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
+    views: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
     ratings: {
       type: [
         {
