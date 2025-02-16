@@ -85,14 +85,15 @@ const create = async (req, res) => {
 
     // Create the new object document
     const newObject = new Object({
+      uploadedBy: currentUser._id,
+      title,
+      description: description || "No description provided", // Default to "No description"
       file: {
         fileName: objectFileResult.public_id, // Cloudinary public ID
         filePath: objectFileResult.url, // Cloudinary secure URL
         fileType: objectFileResult.format, // File format from Cloudinary
         fileSize: objectFileResult.bytes, // File size from Cloudinary (in bytes)
       },
-      title,
-      description: description || "No description provided", // Default to "No description"
     });
 
     // Save the new object to the database
