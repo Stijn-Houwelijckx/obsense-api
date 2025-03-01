@@ -235,9 +235,10 @@ const show = async (req, res) => {
       .populate("createdBy", "username") // Only populate 'username' field in createdBy
       .populate("objects") // Populate other fields as needed
       .populate("genres")
-      .populate("likes")
-      .populate("views")
-      .populate("ratings.user");
+      .populate("likes", "username")
+      .populate("views", "username")
+      .populate("ratings.user", "username")
+      .populate("ratings.rating");
 
     if (!collection) {
       return res.status(404).json({
