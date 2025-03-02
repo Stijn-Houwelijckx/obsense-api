@@ -7,10 +7,10 @@ const { v4: uuidv4 } = require("uuid");
  * Uploads a file to Cloudinary.
  *
  * @param {string} filePath - The path to the file to be uploaded.
- * @param {string} fileType - The type of the file to determine the folder and resource type.
- *                            Valid values are "profileImage", "coverImage", and "object".
- * @returns {Promise<Object>} - A promise that resolves to an object containing the URL and public ID of the uploaded file.
- * @throws {Error} - Throws an error if the file type is invalid or if the upload fails.
+ * @param {string} fileType - The type of the file (e.g., "profileImage", "coverImage", "object").
+ * @param {string} originalFileName - The original name of the file.
+ * @returns {Promise<Object>} - A promise that resolves to an object containing the URL, public ID, format, and size of the uploaded file.
+ * @throws {Error} - Throws an error if the upload fails or if an invalid file type is provided.
  */
 const uploadToCloudinary = async (filePath, fileType, originalFileName) => {
   try {
