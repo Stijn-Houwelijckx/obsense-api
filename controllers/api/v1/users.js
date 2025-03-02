@@ -1,4 +1,6 @@
 const User = require("../../../models/api/v1/User");
+const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
+const deleteFromCloudinary = require("../../../utils/deleteFromCloudinary");
 
 // Functions to hanbdle requests for the currently authenticated user
 
@@ -43,6 +45,73 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+// Change the currently logged-in user's profile picture
+const changeProfilePicture = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "No file uploaded",
+        },
+      });
+    }
+
+    // Get the user's current profile picture details
+    const user = await User.findById(req.user._id).select("profilePicture");
+
+    // Delete the current profile picture from Cloudinary
+    if (
+      user.profilePicture.fileName &&
+      user.profilePicture.fileName !== "Default"
+    ) {
+      await deleteFromCloudinary(user.profilePicture.fileName, "image");
+    }
+
+    // Upload the new profile picture to Cloudinary
+    const result = await uploadToCloudinary(
+      req.file.path,
+      "profileImage",
+      req.file.originalname
+    );
+
+    // Update the user's profile picture details
+    user.profilePicture = {
+      fileName: result.public_id,
+      filePath: result.url,
+      fileType: result.format,
+      fileSize: result.bytes,
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user: user,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Unable to update profile picture",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
+};
+
 // ================================================================================================= //
 
 // Functions to handle requests for all users
@@ -79,6 +148,7 @@ const index = async (req, res) => {
 module.exports = {
   // Export funtions for currently authenticated users
   getCurrentUser,
+  changeProfilePicture,
 
   // Export functions for all users
   index,
