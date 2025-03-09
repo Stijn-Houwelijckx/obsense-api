@@ -18,7 +18,9 @@ const getCurrentUser = async (req, res) => {
 
     // Fetch the user data, excluding sensitive fields
     const user = await User.findById(req.user._id) // Get the user ID from the request object
-      .select("firstName lastName username email isArtist profilePicture") // Explicitly select fields
+      .select(
+        "firstName lastName username email isArtist profilePicture tokens"
+      ) // Explicitly select fields
       .lean(); // Use lean() for performance if we don't need Mongoose documents
 
     if (!user) {

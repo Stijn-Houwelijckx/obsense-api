@@ -15,6 +15,7 @@ const UserSchema = new Schema(
       fileType: { type: String, default: ".jpg" },
       fileSize: { type: Number, default: 8273 },
     },
+    tokens: { type: Number, default: 0, required: true },
   },
   { timestamps: true } // Automatically add createdAt and updatedAt fields
 );
