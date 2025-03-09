@@ -2,7 +2,7 @@ const Purchase = require("../../../models/api/v1/Purchase");
 const Collection = require("../../../models/api/v1/Collection");
 const User = require("../../../models/api/v1/User");
 
-// Controller to create a new collection
+// Controller to create a new purchase record
 const create = async (req, res) => {
   try {
     // Check if the user is authenticated and is an artist
@@ -112,6 +112,59 @@ const create = async (req, res) => {
   }
 };
 
+// Get purchases for the logged in user
+const index = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const userId = req.user._id;
+
+    // Fetch all purchases for the user
+    const purchases = await Purchase.find({ user: userId })
+      .populate({
+        path: "collection",
+        select: "_id type title coverImage location",
+      })
+      .sort({ purchasedAt: -1 });
+
+    if (!purchases || purchases.length === 0) {
+      return res.status(204).json({
+        status: "success",
+        message: "No purchases found",
+        data: {
+          purchases: [],
+        },
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        purchases: purchases,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   create,
+  index,
 };
