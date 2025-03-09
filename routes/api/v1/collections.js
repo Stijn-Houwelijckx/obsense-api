@@ -17,4 +17,11 @@ router.get(
   collectionController.indexByCreator // Controller to get a single collection
 );
 
+// Route to get a single collection by ID
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  collectionController.show // Controller to get a single collection
+);
+
 module.exports = router;

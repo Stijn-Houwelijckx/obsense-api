@@ -132,7 +132,70 @@ const indexByCreator = async (req, res) => {
   }
 };
 
+// Get collection by ID if published and active
+const show = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const collectionId = req.params.id;
+
+    // Fetch the collection
+    const collection = await Collection.findById(collectionId)
+      .select(
+        "_id type title description city price coverImage createdBy objects likes views ratings genres location isPublished isActive"
+      )
+      .populate("createdBy", "username")
+      .populate("genres", "name");
+
+    if (!collection || !collection.isPublished || !collection.isActive) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Collection not found.",
+        },
+      });
+    }
+
+    // Process the collection to add the number of likes, views, average rating and number of objects
+    const processedCollection = collection.toObject();
+    processedCollection.objects = collection.objects.length;
+    processedCollection.likes = collection.likes.length;
+    processedCollection.views = collection.views.length;
+    // Calculate the average rating
+    if (collection.ratings.length > 0) {
+      const totalRating = collection.ratings.reduce((acc, rating) => {
+        return acc + rating.rating;
+      }, 0);
+      processedCollection.ratings = totalRating / collection.ratings.length;
+    } else {
+      processedCollection.ratings = 0;
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: { collection: processedCollection },
+    });
+  } catch (error) {
+    console.error("Error fetching collection:", error);
+    return res.status(500).json({
+      status: "fail",
+      data: {
+        message: "Error fetching collection.",
+      },
+    });
+  }
+};
+
 module.exports = {
   index,
   indexByCreator,
+  show,
 };
