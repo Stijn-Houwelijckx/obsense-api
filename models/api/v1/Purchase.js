@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const PurchaseSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    collection: {
+    collectionRef: {
       type: Schema.Types.ObjectId,
       ref: "Collection",
       required: true,

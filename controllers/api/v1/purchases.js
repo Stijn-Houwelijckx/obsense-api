@@ -53,7 +53,7 @@ const create = async (req, res) => {
     // Check if the user already owns the collection
     const existingPurchase = await Purchase.findOne({
       user: userId,
-      collection: collectionId,
+      collectionRef: collectionId,
       isActive: true,
     });
 
@@ -83,7 +83,7 @@ const create = async (req, res) => {
     // Create a new purchase record
     const newPurchase = new Purchase({
       user: userId,
-      collection: collectionId,
+      collectionRef: collectionId,
       price: collection.price,
       paymentStatus: "completed",
       isActive: true,
@@ -130,7 +130,7 @@ const index = async (req, res) => {
     // Fetch all purchases for the user
     const purchases = await Purchase.find({ user: userId })
       .populate({
-        path: "collection",
+        path: "collectionRef",
         select: "_id type title coverImage location",
       })
       .sort({ purchasedAt: -1 });
