@@ -43,11 +43,11 @@ const signup = async (req, res) => {
     }
 
     // Check if password is strong enough
-    if (password.length < 5) {
+    if (password.length < 8) {
       return res.status(400).json({
         status: "fail",
         data: {
-          message: "Password should be at least 5 characters long",
+          message: "Password should be at least 8 characters long",
         },
       });
     }
