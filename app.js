@@ -14,6 +14,7 @@ mongoose.connect(connection);
 
 // importing the routes
 const userRoute = require("./routes/api/v1/users");
+const artistRoute = require("./routes/api/v1/artists");
 const artistCollectionRoute = require("./routes/api/v1/artistCollections");
 const objectRoute = require("./routes/api/v1/objects");
 const placedObjectRoute = require("./routes/api/v1/placedObjects");
@@ -37,6 +38,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // using the routes
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/artists", artistRoute);
 app.use("/api/v1/artist/collections", artistCollectionRoute);
 app.use("/api/v1/objects", objectRoute);
 app.use("/api/v1/placedObjects", placedObjectRoute);
