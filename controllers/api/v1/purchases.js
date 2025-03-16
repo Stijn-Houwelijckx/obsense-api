@@ -131,7 +131,8 @@ const index = async (req, res) => {
     const purchases = await Purchase.find({ user: userId })
       .populate({
         path: "collectionRef",
-        select: "_id type title coverImage location",
+        select: "_id type title coverImage createdBy location",
+        populate: { path: "createdBy", select: "username" },
       })
       .sort({ purchasedAt: -1 });
 
