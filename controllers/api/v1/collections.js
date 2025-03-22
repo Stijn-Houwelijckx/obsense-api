@@ -14,6 +14,17 @@ const index = async (req, res) => {
       });
     }
 
+    // Get pagination parameters from query (defaults: page=1, limit=20)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit; // Calculate how many to skip
+
+    // Fetch total count (to calculate total pages)
+    const totalCollections = await Collection.countDocuments({
+      isPublished: true,
+      isActive: true,
+    });
+
     // Fetch only published and active collections
     const collections = await Collection.find({
       isPublished: true,
@@ -22,7 +33,10 @@ const index = async (req, res) => {
       .select(
         "_id type title price coverImage createdBy likes views ratings location"
       )
-      .populate("createdBy", "username");
+      .populate("createdBy", "username")
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     if (!collections || collections.length === 0) {
       return res.status(204).json({
@@ -35,25 +49,24 @@ const index = async (req, res) => {
     }
 
     // Process collections to add the number of likes, views, and average rating
-    const processedCollections = collections.map((collection) => {
-      const processedCollection = collection.toObject();
-      processedCollection.likes = collection.likes.length;
-      processedCollection.views = collection.views.length;
-      // Calculate the average rating
-      if (collection.ratings.length > 0) {
-        const totalRating = collection.ratings.reduce((acc, rating) => {
-          return acc + rating.rating;
-        }, 0);
-        processedCollection.ratings = totalRating / collection.ratings.length;
-      } else {
-        processedCollection.ratings = 0;
-      }
-      return processedCollection;
-    });
+    const processedCollections = collections.map((collection) => ({
+      ...collection,
+      likes: collection.likes.length,
+      views: collection.views.length,
+      ratings: collection.ratings.length
+        ? collection.ratings.reduce((acc, r) => acc + r.rating, 0) /
+          collection.ratings.length
+        : 0,
+    }));
 
     return res.status(200).json({
       status: "success",
-      data: { collections: processedCollections },
+      data: {
+        collections: processedCollections,
+        currentPage: page,
+        totalPages: Math.ceil(totalCollections / limit),
+        hasMore: page < Math.ceil(totalCollections / limit), // Check if there are more pages
+      },
     });
   } catch (error) {
     console.error("Error fetching collections:", error);
