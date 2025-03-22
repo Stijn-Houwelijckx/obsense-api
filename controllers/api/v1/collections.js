@@ -151,7 +151,7 @@ const show = async (req, res) => {
     // Fetch the collection
     const collection = await Collection.findById(collectionId)
       .select(
-        "_id type title description city price coverImage createdBy objects likes views ratings genres location isPublished isActive"
+        "_id type title description city price coverImage createdBy likes views ratings genres location isPublished isActive"
       )
       .populate("createdBy", "username")
       .populate("genres", "name");
@@ -167,7 +167,6 @@ const show = async (req, res) => {
 
     // Process the collection to add the number of likes, views, average rating and number of objects
     const processedCollection = collection.toObject();
-    processedCollection.objects = collection.objects.length;
     processedCollection.likes = collection.likes.length;
     processedCollection.views = collection.views.length;
     // Calculate the average rating
