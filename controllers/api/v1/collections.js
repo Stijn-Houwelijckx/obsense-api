@@ -25,10 +25,11 @@ const index = async (req, res) => {
       .populate("createdBy", "username");
 
     if (!collections || collections.length === 0) {
-      return res.status(404).json({
-        status: "fail",
+      return res.status(204).json({
+        status: "success",
+        message: "No collections found",
         data: {
-          message: "No collections found.",
+          collections: [],
         },
       });
     }
