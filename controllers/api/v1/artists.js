@@ -14,9 +14,21 @@ const index = async (req, res) => {
       });
     }
 
+    // Get pagination parameters from query (defaults: page=1, limit=20)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit; // Calculate how many to skip
+
+    // Fetch total count (to calculate total pages)
+    const totalArtists = await User.countDocuments({
+      isArtist: true,
+    });
+
     // Find all users who are artists and select only necessary fields
     const artists = await User.find({ isArtist: true })
       .select("username profilePicture")
+      .skip(skip)
+      .limit(limit)
       .lean();
 
     if (!artists || artists.length === 0) {
@@ -45,7 +57,12 @@ const index = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      data: { artists: artistsWithCollectionCount },
+      data: {
+        artists: artistsWithCollectionCount,
+        currentPage: page,
+        totalPages: Math.ceil(totalArtists / limit),
+        hasMore: page < Math.ceil(totalArtists / limit),
+      },
     });
   } catch (error) {
     console.error("Error fetching artists:", error);
