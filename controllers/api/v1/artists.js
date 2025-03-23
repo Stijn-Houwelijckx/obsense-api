@@ -75,6 +75,60 @@ const index = async (req, res) => {
   }
 };
 
+// Show artist
+const show = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    // Find the artist by ID
+    const artist = await User.findById(req.params.id).lean();
+
+    if (!artist) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Artist not found",
+        },
+      });
+    }
+
+    // Fetch all collections by the artist
+    const collections = await Collection.find({
+      createdBy: artist._id,
+      isPublished: true,
+      isActive: true,
+    })
+      .select("title coverImage")
+      .lean();
+
+    artist.collections = collections;
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        artist: artist,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching artist:", error);
+    res.status(500).json({
+      status: "fail",
+      data: {
+        message: "Error fetching artist.",
+      },
+    });
+  }
+};
+
 module.exports = {
   index,
+  show,
 };

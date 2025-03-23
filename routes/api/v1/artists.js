@@ -10,4 +10,11 @@ router.get(
   artistController.index
 );
 
+// Get a single artist
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  artistController.show
+);
+
 module.exports = router;
