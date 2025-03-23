@@ -4,6 +4,16 @@ const Collection = require("../../../models/api/v1/Collection");
 // Get all artists
 const index = async (req, res) => {
   try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
     // Find all users who are artists and select only necessary fields
     const artists = await User.find({ isArtist: true })
       .select("username profilePicture")
