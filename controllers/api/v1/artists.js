@@ -106,10 +106,24 @@ const show = async (req, res) => {
       isPublished: true,
       isActive: true,
     })
-      .select("title coverImage")
+      .select("title coverImage likes views ratings")
       .lean();
 
-    artist.collections = collections;
+    if (collections && collections.length !== 0) {
+      const processedCollections = collections.map((collection) => ({
+        ...collection,
+        likes: collection.likes.length,
+        views: collection.views.length,
+        ratings: collection.ratings.length
+          ? collection.ratings.reduce((acc, r) => acc + r.rating, 0) /
+            collection.ratings.length
+          : 0,
+      }));
+
+      artist.collections = processedCollections;
+    } else {
+      artist.collections = [];
+    }
 
     res.status(200).json({
       status: "success",
