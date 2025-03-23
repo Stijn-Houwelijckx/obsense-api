@@ -106,7 +106,7 @@ const show = async (req, res) => {
       isPublished: true,
       isActive: true,
     })
-      .select("title coverImage likes views ratings")
+      .select("title coverImage type likes views ratings")
       .lean();
 
     if (collections && collections.length !== 0) {
