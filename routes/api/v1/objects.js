@@ -17,9 +17,9 @@ router.post(
 );
 
 router.get(
-  "/",
+  "/collections/:id",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
-  objectController.index
+  objectController.indexByCollection
 );
 
 module.exports = router;

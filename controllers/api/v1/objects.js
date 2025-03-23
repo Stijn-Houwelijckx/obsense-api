@@ -1,4 +1,5 @@
 const Object = require("../../../models/api/v1/Object");
+const Collection = require("../../../models/api/v1/Collection");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
 
 const create = async (req, res) => {
@@ -120,14 +121,67 @@ const create = async (req, res) => {
   }
 };
 
-// Get collections of the currently logged-in artist
-const index = async (req, res) => {
-  res
-    .status(200)
-    .json({ message: "Get objects function not implemented yet." });
+// Get all objects by collection
+const indexByCollection = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const collectionId = req.params.id;
+
+    // Fetch the collection
+    const collection = await Collection.findById(collectionId)
+      .populate("objects")
+      .lean();
+
+    if (!collection) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Collection not found.",
+        },
+      });
+    }
+
+    const objects = collection.objects;
+
+    if (!objects || objects.length === 0) {
+      return res.status(204).json({
+        status: "success",
+        message: "No objects found in this collection.",
+        data: {
+          objects: [],
+        },
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        objects: objects,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
 };
 
 module.exports = {
   create,
-  index,
+  indexByCollection,
 };
