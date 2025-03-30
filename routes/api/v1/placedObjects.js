@@ -4,9 +4,9 @@ const passport = require("../../../passport/passport");
 const placedObjectController = require("../../../controllers/api/v1/placedObjects");
 
 router.post(
-  "/",
+  "/save",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
-  placedObjectController.create
+  placedObjectController.save
 );
 
 router.get(
