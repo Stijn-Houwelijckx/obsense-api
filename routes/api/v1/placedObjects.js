@@ -15,4 +15,10 @@ router.get(
   placedObjectController.index
 );
 
+router.delete(
+  "/:id",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  placedObjectController.destroy
+);
+
 module.exports = router;

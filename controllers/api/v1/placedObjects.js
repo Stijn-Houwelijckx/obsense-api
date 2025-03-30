@@ -146,7 +146,81 @@ const index = async (req, res) => {
     .json({ message: "Get placed objects function not implemented yet." });
 };
 
+const destroy = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
+      return res.status(403).json({
+        status: "fail",
+        data: {
+          message: "Forbidden: Only artists can access their collections.",
+        },
+      });
+    }
+
+    // Check if the placed object exists
+    const placedObject = await PlacedObject.findById(id);
+    if (!placedObject) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Placed object not found",
+        },
+      });
+    }
+
+    // Check if the collection of the placed object belongs to the current user
+    const collection = await Collection.findOne({
+      _id: placedObject.collectionRef,
+      createdBy: currentUser._id,
+    });
+
+    if (!collection) {
+      return res.status(403).json({
+        status: "fail",
+        data: {
+          message:
+            "Forbidden: You do not have permission to delete this placed object.",
+        },
+      });
+    }
+
+    // Delete the placed object
+    await PlacedObject.deleteOne({ _id: id });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "Placed object deleted successfully",
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   save,
   index,
+  destroy,
 };
