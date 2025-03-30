@@ -27,6 +27,10 @@ const PlacedObjectSchema = new Schema(
       y: { type: Number, required: true },
       z: { type: Number, required: true },
     },
+    deviceHeading: {
+      type: Number,
+      required: true, // Device heading in degrees
+    },
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );
