@@ -139,11 +139,67 @@ const save = async (req, res) => {
   }
 };
 
-// Get collections of the currently logged-in artist
-const index = async (req, res) => {
-  res
-    .status(200)
-    .json({ message: "Get placed objects function not implemented yet." });
+// Get placed objects by collection ID
+const indexByCollection = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const { collectionId } = req.params;
+
+    // Check if the collection exists
+    const collection = await Collection.findOne({
+      _id: collectionId,
+    });
+
+    if (!collection) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Collection not found",
+        },
+      });
+    }
+
+    // Get placed objects for the specified collection
+    const placedObjects = await PlacedObject.find({
+      collectionRef: collectionId,
+    }).populate("object");
+
+    if (!placedObjects || placedObjects.length === 0) {
+      return res.status(204).json({
+        status: "success",
+        message: "No placed objects found in this collection.",
+        data: {
+          placedObjects: [],
+        },
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        placedObjects: placedObjects,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
 };
 
 const destroy = async (req, res) => {
@@ -221,6 +277,6 @@ const destroy = async (req, res) => {
 
 module.exports = {
   save,
-  index,
+  indexByCollection,
   destroy,
 };

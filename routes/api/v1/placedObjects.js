@@ -10,9 +10,9 @@ router.post(
 );
 
 router.get(
-  "/",
+  "/:collectionId",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
-  placedObjectController.index
+  placedObjectController.indexByCollection
 );
 
 router.delete(
