@@ -31,6 +31,11 @@ const PlacedObjectSchema = new Schema(
       type: Number,
       required: true, // Device heading in degrees
     },
+    origin: {
+      lat: { type: Number, required: true },
+      lon: { type: Number, required: true },
+      heading: { type: Number, required: true },
+    },
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );

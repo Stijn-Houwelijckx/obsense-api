@@ -33,6 +33,7 @@ const save = async (req, res) => {
       scale,
       rotation,
       deviceHeading,
+      origin,
     } = req.body.placedObject;
 
     // Validate required fields
@@ -43,7 +44,11 @@ const save = async (req, res) => {
       !position ||
       !scale ||
       !rotation ||
-      deviceHeading === undefined
+      deviceHeading === undefined ||
+      !origin ||
+      !origin.lat === undefined ||
+      !origin.lon === undefined ||
+      !origin.heading === undefined
     ) {
       return res.status(400).json({
         status: "fail",
@@ -98,6 +103,7 @@ const save = async (req, res) => {
       existingPlacedObject.scale = scale;
       existingPlacedObject.rotation = rotation;
       existingPlacedObject.deviceHeading = deviceHeading;
+      existingPlacedObject.origin = origin;
       const updatedPlacedObject = await existingPlacedObject.save();
 
       return res.status(200).json({
@@ -116,6 +122,7 @@ const save = async (req, res) => {
         scale,
         rotation,
         deviceHeading,
+        origin,
       });
 
       return res.status(201).json({
