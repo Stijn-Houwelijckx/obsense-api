@@ -96,10 +96,15 @@ const changeProfilePicture = async (req, res) => {
 
     await user.save();
 
+    // Fetch the complete user details
+    const updatedUser = await User.findById(req.user._id).select(
+      "firstName lastName username email isArtist profilePicture tokens"
+    );
+
     res.status(200).json({
       status: "success",
       data: {
-        user: user,
+        user: updatedUser,
       },
     });
   } catch (err) {
