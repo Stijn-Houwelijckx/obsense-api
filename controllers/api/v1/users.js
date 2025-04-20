@@ -147,6 +147,60 @@ const index = async (req, res) => {
   }
 };
 
+// Update the user profile
+const update = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const { firstName, lastName, username, email } = req.body.user;
+    const user = req.user; // Get the user ID from the request object
+
+    // Validate input data
+    if (!firstName || !lastName || !username || !email) {
+      return res.status(400).json({
+        status: "fail",
+        message: "All fields are required",
+      });
+    }
+
+    // Update the user profile
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { firstName, lastName, username, email },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "User profile updated successfully",
+        user: updatedUser,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Unable to update user profile",
+      error: err.message,
+    });
+  }
+};
+
 module.exports = {
   // Export funtions for currently authenticated users
   getCurrentUser,
@@ -154,4 +208,5 @@ module.exports = {
 
   // Export functions for all users
   index,
+  update,
 };

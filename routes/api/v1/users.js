@@ -26,6 +26,13 @@ router.put(
 // Get all users
 router.get("/", userController.index);
 
+// Update user profile
+router.put(
+  "/me",
+  passport.authenticate("jwt", { session: false }),
+  userController.update
+);
+
 // Signup and login routes
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
