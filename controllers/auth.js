@@ -201,17 +201,19 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Verify old password
-    await user.authenticate(oldPassword).then((result) => {
-      if (!result) {
-        return res.status(400).json({
-          status: "fail",
-          data: {
-            message: "Old password is incorrect",
-          },
-        });
-      }
-    });
+    // Verify old password using passport-local-mongoose's authenticate method
+    const { user: authenticatedUser, error } = await User.authenticate()(
+      user.email,
+      oldPassword
+    );
+    if (error || !authenticatedUser) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Old password is incorrect",
+        },
+      });
+    }
 
     // Check if old password is the same as new password
     if (oldPassword === newPassword) {
