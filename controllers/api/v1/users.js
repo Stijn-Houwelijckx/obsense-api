@@ -172,7 +172,9 @@ const update = async (req, res) => {
     if (!firstName || !lastName || !username || !email) {
       return res.status(400).json({
         status: "fail",
-        message: "All fields are required",
+        data: {
+          message: "All fields are required",
+        },
       });
     }
 
@@ -186,7 +188,9 @@ const update = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({
         status: "fail",
-        message: "User not found",
+        data: {
+          message: "User not found",
+        },
       });
     }
 
@@ -200,8 +204,11 @@ const update = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       status: "error",
-      message: "Unable to update user profile",
-      error: err.message,
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
     });
   }
 };
