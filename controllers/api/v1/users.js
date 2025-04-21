@@ -178,6 +178,45 @@ const update = async (req, res) => {
       });
     }
 
+    // Check if username is unique
+    const existingUser = await User.findOne({
+      username: username,
+      _id: { $ne: user._id },
+    });
+    if (existingUser) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "username already exists",
+        },
+      });
+    }
+
+    // Check if user already exists
+    const existingUserEmail = await User.findOne({
+      email: email,
+      _id: { $ne: user._id },
+    });
+    if (existingUserEmail) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "User already exists",
+        },
+      });
+    }
+
+    // Check if email is valid
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "Please enter a valid email",
+        },
+      });
+    }
+
     // Update the user profile
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
