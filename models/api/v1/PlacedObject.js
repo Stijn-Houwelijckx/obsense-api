@@ -37,7 +37,10 @@ const PlacedObjectSchema = new Schema(
       heading: { type: Number, required: true },
     },
   },
-  { timestamps: true } // Automatically adds createdAt and updatedAt fields
+  {
+    timestamps: true,
+    collection: "placed_objects", // Specify the collection name
+  } // Automatically adds createdAt and updatedAt fields
 );
 
 const PlacedObject = mongoose.model("PlacedObject", PlacedObjectSchema);
