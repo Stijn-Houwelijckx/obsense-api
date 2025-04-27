@@ -226,11 +226,11 @@ const changePassword = async (req, res) => {
     }
 
     // Check if password is strong enough
-    if (newPassword.length < 5) {
+    if (newPassword.length < 8) {
       return res.status(400).json({
         status: "fail",
         data: {
-          message: "Password should be at least 5 characters long",
+          message: "Password should be at least 8 characters long",
         },
       });
     }
