@@ -252,6 +252,49 @@ const update = async (req, res) => {
   }
 };
 
+// Delete account
+const destroy = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    // Delete the user account
+    const deletedUser = await User.findByIdAndDelete(req.user._id);
+
+    if (!deletedUser) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "User not found",
+        },
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "User account deleted successfully",
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   // Export funtions for currently authenticated users
   getCurrentUser,
@@ -260,4 +303,5 @@ module.exports = {
   // Export functions for all users
   index,
   update,
+  destroy,
 };

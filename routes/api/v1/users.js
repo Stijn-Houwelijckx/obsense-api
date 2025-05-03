@@ -33,6 +33,13 @@ router.put(
   userController.update
 );
 
+// Delete user account
+router.delete(
+  "/me",
+  passport.authenticate("jwt", { session: false }),
+  userController.destroy
+);
+
 // Signup and login routes
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
