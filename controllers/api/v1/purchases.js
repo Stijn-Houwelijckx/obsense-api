@@ -16,7 +16,7 @@ const create = async (req, res) => {
     }
 
     const userId = req.user._id;
-    const { collectionId } = req.body.purchase;
+    const { collectionId } = req.params;
 
     // Check if the collection ID is provided
     if (!collectionId) {

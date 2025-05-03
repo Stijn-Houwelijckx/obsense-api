@@ -5,7 +5,7 @@ const purchaseController = require("../../../controllers/api/v1/purchases");
 
 // Route to create a new purchase record
 router.post(
-  "/",
+  "/:collectionId",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
   purchaseController.create
 );
