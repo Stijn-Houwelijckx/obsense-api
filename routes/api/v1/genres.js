@@ -15,4 +15,10 @@ router.get(
   genreController.index
 );
 
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  genreController.show
+);
+
 module.exports = router;

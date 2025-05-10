@@ -145,7 +145,53 @@ const index = async (req, res) => {
   }
 };
 
+const show = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const genreId = req.params.id;
+
+    // Fetch the genre
+    const genre = await Genre.findById(genreId).lean();
+
+    if (!genre) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Genre not found.",
+        },
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        genre: genre,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   create,
   index,
+  show,
 };
