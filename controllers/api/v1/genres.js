@@ -100,6 +100,52 @@ const create = async (req, res) => {
   }
 };
 
+// Get all genres
+const index = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    // Fetch all genres
+    const genres = await Genre.find().lean();
+
+    if (!genres || genres.length === 0) {
+      return res.status(204).json({
+        status: "success",
+        message: "No genres found.",
+        data: {
+          genres: [],
+        },
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        genres: genres,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   create,
+  index,
 };
