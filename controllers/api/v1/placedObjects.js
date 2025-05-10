@@ -233,6 +233,16 @@ const destroy = async (req, res) => {
       });
     }
 
+    // Check if the ID is a valid MongoDB ObjectId, if not return 404
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Placed object not found",
+        },
+      });
+    }
+
     // Check if the placed object exists
     const placedObject = await PlacedObject.findById(id);
     if (!placedObject) {
