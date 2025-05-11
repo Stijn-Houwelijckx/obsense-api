@@ -201,17 +201,19 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Verify old password
-    await user.authenticate(oldPassword).then((result) => {
-      if (!result) {
-        return res.status(400).json({
-          status: "fail",
-          data: {
-            message: "Old password is incorrect",
-          },
-        });
-      }
-    });
+    // Verify old password using passport-local-mongoose's authenticate method
+    const { user: authenticatedUser, error } = await User.authenticate()(
+      user.email,
+      oldPassword
+    );
+    if (error || !authenticatedUser) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Old password is incorrect",
+        },
+      });
+    }
 
     // Check if old password is the same as new password
     if (oldPassword === newPassword) {
@@ -224,11 +226,11 @@ const changePassword = async (req, res) => {
     }
 
     // Check if password is strong enough
-    if (newPassword.length < 5) {
+    if (newPassword.length < 8) {
       return res.status(400).json({
         status: "fail",
         data: {
-          message: "Password should be at least 5 characters long",
+          message: "Password should be at least 8 characters long",
         },
       });
     }

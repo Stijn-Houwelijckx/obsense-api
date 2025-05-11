@@ -26,6 +26,20 @@ router.put(
 // Get all users
 router.get("/", userController.index);
 
+// Update user profile
+router.put(
+  "/me",
+  passport.authenticate("jwt", { session: false }),
+  userController.update
+);
+
+// Delete user account
+router.delete(
+  "/me",
+  passport.authenticate("jwt", { session: false }),
+  userController.destroy
+);
+
 // Signup and login routes
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);

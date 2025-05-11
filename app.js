@@ -21,6 +21,7 @@ const placedObjectRoute = require("./routes/api/v1/placedObjects");
 const genreRoute = require("./routes/api/v1/genres");
 const purchaseRoute = require("./routes/api/v1/purchases");
 const collectionRoute = require("./routes/api/v1/collections");
+const tokenRoute = require("./routes/api/v1/tokens");
 
 var app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/v1/placedObjects", placedObjectRoute);
 app.use("/api/v1/genres", genreRoute);
 app.use("/api/v1/purchases", purchaseRoute);
 app.use("/api/v1/collections", collectionRoute);
+app.use("/api/v1/tokens", tokenRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -96,10 +96,15 @@ const changeProfilePicture = async (req, res) => {
 
     await user.save();
 
+    // Fetch the complete user details
+    const updatedUser = await User.findById(req.user._id).select(
+      "firstName lastName username email isArtist profilePicture tokens"
+    );
+
     res.status(200).json({
       status: "success",
       data: {
-        user: user,
+        user: updatedUser,
       },
     });
   } catch (err) {
@@ -147,6 +152,149 @@ const index = async (req, res) => {
   }
 };
 
+// Update the user profile
+const update = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const { firstName, lastName, username, email } = req.body.user;
+    const user = req.user; // Get the user ID from the request object
+
+    // Validate input data
+    if (!firstName || !lastName || !username || !email) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "All fields are required",
+        },
+      });
+    }
+
+    // Check if username is unique
+    const existingUser = await User.findOne({
+      username: username,
+      _id: { $ne: user._id },
+    });
+    if (existingUser) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "username already exists",
+        },
+      });
+    }
+
+    // Check if user already exists
+    const existingUserEmail = await User.findOne({
+      email: email,
+      _id: { $ne: user._id },
+    });
+    if (existingUserEmail) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "User already exists",
+        },
+      });
+    }
+
+    // Check if email is valid
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        status: "fail",
+        data: {
+          message: "Please enter a valid email",
+        },
+      });
+    }
+
+    // Update the user profile
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { firstName, lastName, username, email },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "User not found",
+        },
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "User profile updated successfully",
+        user: updatedUser,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
+};
+
+// Delete account
+const destroy = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    // Delete the user account
+    const deletedUser = await User.findByIdAndDelete(req.user._id);
+
+    if (!deletedUser) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "User not found",
+        },
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "User account deleted successfully",
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+      data: {
+        code: 500,
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   // Export funtions for currently authenticated users
   getCurrentUser,
@@ -154,4 +302,6 @@ module.exports = {
 
   // Export functions for all users
   index,
+  update,
+  destroy,
 };
