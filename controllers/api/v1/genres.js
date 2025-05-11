@@ -35,7 +35,7 @@ const create = async (req, res) => {
     }
 
     // Only allow letters, spaces and hyphens
-    const regex = /^[a-zA-Z\s-]+$/;
+    const regex = /^[a-zA-Z0-9\s-]+$/;
     if (!regex.test(name)) {
       return res.status(400).json({
         status: "fail",
