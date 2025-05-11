@@ -15,10 +15,10 @@ var ExtractJwt = require("passport-jwt").ExtractJwt;
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.JWT_SECRET;
-passport.use(new JwtStrategy(opts, async function (jwt_payload, done) {
+passport.use(
+  new JwtStrategy(opts, async function (jwt_payload, done) {
     try {
-      // FIX: Use async/await instead of callback
-      const user = await User.findOne({ _id: jwt_payload.uid });
+      const user = await User.findOne({ _id: jwt_payload.id });
       if (user) {
         return done(null, user);
       } else {

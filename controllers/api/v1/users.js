@@ -2,76 +2,185 @@ const User = require("../../../models/api/v1/User");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
 const deleteFromCloudinary = require("../../../utils/deleteFromCloudinary");
 
-// Functions to hanbdle requests for the currently authenticated user
+// Functions to handle requests for the authenticated user
 
-// Get the currently logged-in user's profile data
+// Get profile data of authenticated user
 const getCurrentUser = async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
         data: {
-          message: "Unauthorized",
+          message: "Authorisation failed. Please sign in again.",
         },
       });
     }
 
-    // Fetch the user data, excluding sensitive fields
+    // Get profile data of the authenticated user, excluding sensitive fields
     const user = await User.findById(req.user._id) // Get the user ID from the request object
       .select(
         "firstName lastName username email isArtist profilePicture tokens"
-      ) // Explicitly select fields
+      )
       .lean(); // Use lean() for performance if we don't need Mongoose documents
 
     if (!user) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
         data: {
-          message: "User not found",
+          message: "This user could not be found.",
         },
       });
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         user: user,
       },
     });
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({
+      code: 500,
       status: "error",
-      message: "Unable to fetch current user",
-      error: err.message,
+      data: {
+        message: "This user could not be found. Please try again.",
+        details: error.message,
+      },
     });
   }
 };
 
-// Change the currently logged-in user's profile picture
-const changeProfilePicture = async (req, res) => {
+// Change password of authenticated user
+const changePassword = async (req, res) => {
   try {
+    // Get user input
+    const { oldPassword, newPassword } = req.body.user;
+
+    // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
         data: {
-          message: "Unauthorized",
+          message: "Authorisation failed. Please sign in again.",
         },
       });
     }
 
+    // Make sure all fields are filled in
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        data: {
+          message: "Please fill in all required fields.",
+        },
+      });
+    }
+
+    // Get user with userId from decoded JWT token
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        data: {
+          message: "This user could not be found.",
+        },
+      });
+    }
+
+    // Check if the old password is correct
+    const { user: authenticatedUser, error } = await User.authenticate()(
+      user.email,
+      oldPassword
+    );
+    if (error || !authenticatedUser) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        data: {
+          message: "The old password is incorrect.",
+        },
+      });
+    }
+
+    // Check if old password is the same as new password
+    if (oldPassword === newPassword) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        data: {
+          message: "The new password must be different from the old password.",
+        },
+      });
+    }
+
+    // Check if new password is long enough
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        data: {
+          message: "The password should be at least 8 characters long.",
+        },
+      });
+    }
+
+    // Change the password of the user
+    await user.changePassword(oldPassword, newPassword).then(() => {
+      res.status(200).json({
+        code: 200,
+        status: "success",
+        data: {
+          message: "The password has been changed with success.",
+        },
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      status: "error",
+      data: {
+        message: "Something went wrong. Please try again.",
+        details: err.message,
+      },
+    });
+  }
+};
+
+// Change profile picture of authenticated user
+const changeProfilePicture = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        data: {
+          message: "Authorisation failed. Please sign in again.",
+        },
+      });
+    }
+
+    // Check if a file was uploaded
     if (!req.file) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
         data: {
-          message: "No file uploaded",
+          message: "There was no file uploaded. Please try again.",
         },
       });
     }
 
-    // Get the user's current profile picture details
+    // Get current profile picture of the authenticated user
     const user = await User.findById(req.user._id).select("profilePicture");
 
-    // Delete the current profile picture from Cloudinary
+    // Delete current profile picture from cloudinary
     if (
       user.profilePicture.fileName &&
       user.profilePicture.fileName !== "Default"
@@ -86,7 +195,7 @@ const changeProfilePicture = async (req, res) => {
       req.file.originalname
     );
 
-    // Update the user's profile picture details
+    // Update profile picture details of the authenticated user
     user.profilePicture = {
       fileName: result.public_id,
       filePath: result.url,
@@ -94,6 +203,7 @@ const changeProfilePicture = async (req, res) => {
       fileSize: result.bytes,
     };
 
+    // Save the updated profile picture details to the database
     await user.save();
 
     // Fetch the complete user details
@@ -102,6 +212,7 @@ const changeProfilePicture = async (req, res) => {
     );
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         user: updatedUser,
@@ -109,19 +220,17 @@ const changeProfilePicture = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({
+      code: 500,
       status: "error",
-      message: "Unable to update profile picture",
       data: {
-        code: 500,
+        message: "Something went wrong. Please try again.",
         details: err.message,
       },
     });
   }
 };
 
-// ================================================================================================= //
-
-// Functions to handle requests for all users
+// TODO: Remove this route & controller after testing
 
 // Get all users
 const index = async (req, res) => {
@@ -129,14 +238,16 @@ const index = async (req, res) => {
     const users = await User.find({});
     if (users.length === 0) {
       res.status(204).json({
+        code: 204,
         status: "success",
-        message: "No users found",
         data: {
+          message: "No users found.",
           users: [],
         },
       });
     } else {
       res.status(200).json({
+        code: 200,
         status: "success",
         data: {
           users: users,
@@ -145,9 +256,12 @@ const index = async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({
+      code: 500,
       status: "error",
-      message: "Unable to fetch users",
-      error: err.message,
+      data: {
+        message: "Something went wrong. Please try again.",
+        details: err.message,
+      },
     });
   }
 };
@@ -296,11 +410,9 @@ const destroy = async (req, res) => {
 };
 
 module.exports = {
-  // Export funtions for currently authenticated users
   getCurrentUser,
+  changePassword,
   changeProfilePicture,
-
-  // Export functions for all users
   index,
   update,
   destroy,
