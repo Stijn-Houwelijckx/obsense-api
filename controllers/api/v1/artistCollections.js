@@ -1,4 +1,5 @@
 const Collection = require("../../../models/api/v1/Collection");
+const Genre = require("../../../models/api/v1/Genre");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
 
 // Controller to create a new collection
@@ -86,6 +87,21 @@ const create = async (req, res) => {
           message: "Price must be a non-negative integer.",
         },
       });
+    }
+
+    // Check if the genres id's exist in the database
+    if (genres && genres.length > 0) {
+      const genreIds = await Genre.find({ _id: { $in: genres } }).distinct(
+        "_id"
+      );
+      if (genreIds.length !== genres.length) {
+        return res.status(400).json({
+          status: "fail",
+          data: {
+            message: "Some genres do not exist.",
+          },
+        });
+      }
     }
 
     // console.log("Uploaded file object:", req.file);
