@@ -17,6 +17,13 @@ router.get(
   collectionController.indexByCreator // Controller to get a single collection
 );
 
+// Route to get all collections by genre ID
+router.get(
+  "/genre/:id",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  collectionController.indexByGenre // Controller to get a single collection
+);
+
 // Route to get a single collection by ID
 router.get(
   "/:id",

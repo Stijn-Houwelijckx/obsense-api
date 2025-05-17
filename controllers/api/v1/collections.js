@@ -1,4 +1,5 @@
 const Collection = require("../../../models/api/v1/Collection");
+const Genre = require("../../../models/api/v1/Genre");
 const User = require("../../../models/api/v1/User");
 
 // Get all collections
@@ -146,6 +147,69 @@ const indexByCreator = async (req, res) => {
   }
 };
 
+// Get all collections by genre
+const indexByGenre = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: "fail",
+        data: {
+          message: "Unauthorized",
+        },
+      });
+    }
+
+    const genreId = req.params.id;
+
+    // Check if the genre exists
+    const genre = await Genre.findById(genreId);
+
+    if (!genre) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Genre not found.",
+        },
+      });
+    }
+
+    // Fetch only published and active collections
+    const collections = await Collection.find({
+      genres: genreId,
+      isPublished: true,
+      isActive: true,
+    })
+      .select("_id type title price coverImage createdBy")
+      .populate("createdBy", "username");
+
+    if (!collections || collections.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "No collections found.",
+        },
+      });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        genre: genre.name,
+        collections: collections,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching collections:", error);
+    return res.status(500).json({
+      status: "fail",
+      data: {
+        message: "Error fetching collections.",
+      },
+    });
+  }
+};
+
 // Get collection by ID if published and active
 const show = async (req, res) => {
   try {
@@ -211,5 +275,6 @@ const show = async (req, res) => {
 module.exports = {
   index,
   indexByCreator,
+  indexByGenre,
   show,
 };
