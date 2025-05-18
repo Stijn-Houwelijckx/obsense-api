@@ -178,11 +178,10 @@ const indexByGenre = async (req, res) => {
     const genre = await Genre.findById(genreId);
 
     if (!genre) {
-      return res.status(204).json({
-        status: "success",
-        message: "No collections found",
+      return res.status(404).json({
+        status: "fail",
         data: {
-          collections: [],
+          message: "Genre not found.",
         },
       });
     }
@@ -200,10 +199,11 @@ const indexByGenre = async (req, res) => {
       .lean();
 
     if (!collections || collections.length === 0) {
-      return res.status(404).json({
-        status: "fail",
+      return res.status(204).json({
+        status: "success",
+        message: "No collections found",
         data: {
-          message: "No collections found.",
+          collections: [],
         },
       });
     }
