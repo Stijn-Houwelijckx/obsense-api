@@ -162,14 +162,27 @@ const indexByGenre = async (req, res) => {
 
     const genreId = req.params.id;
 
+    // Get pagination parameters from query (defaults: page=1, limit=20)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit; // Calculate how many to skip
+
+    // Fetch total count (to calculate total pages)
+    const totalCollections = await Collection.countDocuments({
+      genres: genreId,
+      isPublished: true,
+      isActive: true,
+    });
+
     // Check if the genre exists
     const genre = await Genre.findById(genreId);
 
     if (!genre) {
-      return res.status(404).json({
-        status: "fail",
+      return res.status(204).json({
+        status: "success",
+        message: "No collections found",
         data: {
-          message: "Genre not found.",
+          collections: [],
         },
       });
     }
@@ -181,7 +194,10 @@ const indexByGenre = async (req, res) => {
       isActive: true,
     })
       .select("_id type title price coverImage createdBy")
-      .populate("createdBy", "username");
+      .populate("createdBy", "username")
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     if (!collections || collections.length === 0) {
       return res.status(404).json({
@@ -197,6 +213,9 @@ const indexByGenre = async (req, res) => {
       data: {
         genre: genre.name,
         collections: collections,
+        currentPage: page,
+        totalPages: Math.ceil(totalCollections / limit),
+        hasMore: page < Math.ceil(totalCollections / limit), // Check if there are more pages
       },
     });
   } catch (error) {
