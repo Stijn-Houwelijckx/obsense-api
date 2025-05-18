@@ -10,4 +10,11 @@ router.get(
   searchController.searchCollections // Controller to search collections
 );
 
+// Route to search artists
+router.get(
+  "/artists",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  searchController.searchArtists // Controller to search users
+);
+
 module.exports = router;
