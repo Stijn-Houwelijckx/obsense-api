@@ -45,6 +45,9 @@ const CollectionSchema = new Schema(
   { timestamps: true }
 );
 
+// Index
+CollectionSchema.index({ title: "text" });
+
 const Collection = mongoose.model("Collection", CollectionSchema);
 
 module.exports = Collection;
