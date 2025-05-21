@@ -7,30 +7,27 @@ const create = async (req, res) => {
     // Check if the user is authenticated and is an artist
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
     const currentUser = req.user;
     if (!currentUser.isArtist) {
       return res.status(403).json({
+        code: 403,
         status: "fail",
-        data: {
-          message: "Forbidden: Only artists can upload objects.",
-        },
+        message: "Forbidden: Only artists can upload objects.",
       });
     }
 
     // Now, assuming the file has been validated already, we can proceed:
     if (!req.file) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "No file uploaded.",
-        },
+        message: "No file uploaded.",
       });
     }
 
@@ -41,29 +38,26 @@ const create = async (req, res) => {
 
     if (!title) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Title is required.",
-        },
+        message: "Title is required.",
       });
     }
 
     // Validation for title, description
     if (title.length < 1 || title.length > 35) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Title must be between 1 and 35 characters.",
-        },
+        message: "Title must be between 1 and 35 characters.",
       });
     }
 
     if (description && description.length > 500) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Description cannot exceed 500 characters.",
-        },
+        message: "Description cannot exceed 500 characters.",
       });
     }
 
@@ -76,10 +70,9 @@ const create = async (req, res) => {
 
     if (!objectFileResult) {
       return res.status(500).json({
-        status: "fail",
-        data: {
-          message: "Error uploading 3D-Object to Cloudinary",
-        },
+        code: 500,
+        status: "error",
+        message: "Error uploading 3D-Object to Cloudinary",
       });
     }
 
@@ -103,6 +96,7 @@ const create = async (req, res) => {
     const savedObject = await newObject.save();
 
     res.status(201).json({
+      code: 201,
       status: "success",
       data: {
         object: savedObject,
@@ -111,10 +105,10 @@ const create = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
@@ -127,10 +121,9 @@ const indexByCollection = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -143,10 +136,9 @@ const indexByCollection = async (req, res) => {
 
     if (!collection) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Collection not found.",
-        },
+        message: "Collection not found.",
       });
     }
 
@@ -154,6 +146,7 @@ const indexByCollection = async (req, res) => {
 
     if (!objects || objects.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No objects found in this collection.",
         data: {
@@ -163,6 +156,7 @@ const indexByCollection = async (req, res) => {
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         objects: objects,
@@ -171,10 +165,10 @@ const indexByCollection = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });

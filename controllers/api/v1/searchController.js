@@ -7,20 +7,18 @@ const searchCollections = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
     const { query, page = 1, limit = 20 } = req.query;
     if (!query || typeof query !== "string") {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Query parameter 'query' is required.",
-        },
+        message: "Query parameter 'query' is required.",
       });
     }
 
@@ -70,6 +68,7 @@ const searchCollections = async (req, res) => {
 
     if (!paginated || paginated.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No collections found",
         data: {
@@ -79,6 +78,7 @@ const searchCollections = async (req, res) => {
     }
 
     return res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         collections: paginated,
@@ -91,10 +91,9 @@ const searchCollections = async (req, res) => {
   } catch (error) {
     console.error("Error fetching collections:", error);
     res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching collections.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching collections.",
     });
   }
 };
@@ -105,20 +104,18 @@ const searchArtists = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
     const { query, page = 1, limit = 20 } = req.query;
     if (!query || typeof query !== "string") {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Query parameter 'query' is required.",
-        },
+        message: "Query parameter 'query' is required.",
       });
     }
 
@@ -165,6 +162,7 @@ const searchArtists = async (req, res) => {
 
     if (!paginated || paginated.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No artists found",
         data: {
@@ -174,6 +172,7 @@ const searchArtists = async (req, res) => {
     }
 
     return res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         artists: paginated,
@@ -186,10 +185,9 @@ const searchArtists = async (req, res) => {
   } catch (error) {
     console.error("Error fetching artists:", error);
     res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching artists.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching artists.",
     });
   }
 };

@@ -21,9 +21,7 @@ const signup = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "Please fill in all required fields.",
-        },
+        message: "Please fill in all required fields.",
       });
     }
 
@@ -33,9 +31,7 @@ const signup = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "This email is already in use. Please try again.",
-        },
+        message: "This email is already in use. Please try again.",
       });
     }
 
@@ -46,9 +42,7 @@ const signup = async (req, res) => {
         return res.status(400).json({
           code: 400,
           status: "fail",
-          data: {
-            message: "This username already exists. Please try again.",
-          },
+          message: "This username already exists. Please try again.",
         });
       }
     }
@@ -58,9 +52,7 @@ const signup = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "The password should be at least 8 characters long.",
-        },
+        message: "The password should be at least 8 characters long.",
       });
     }
 
@@ -70,9 +62,7 @@ const signup = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "Please enter a valid email address to sign up.",
-        },
+        message: "Please enter a valid email address to sign up.",
       });
     }
 
@@ -102,8 +92,8 @@ const signup = async (req, res) => {
         res.status(500).json({
           code: 500,
           status: "error",
+          message: "Could not create user. Please try again.",
           data: {
-            message: "Could not create user. Please try again.",
             details: error.message,
           },
         });
@@ -112,8 +102,8 @@ const signup = async (req, res) => {
     res.status(500).json({
       code: 500,
       status: "error",
+      message: "Something went wrong. Please try again.",
       data: {
-        message: "Something went wrong. Please try again.",
         details: error.message,
       },
     });
@@ -131,9 +121,7 @@ const login = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "Please fill in all required fields.",
-        },
+        message: "Please fill in all required fields.",
       });
     }
 
@@ -144,9 +132,7 @@ const login = async (req, res) => {
         return res.status(400).json({
           code: 400,
           status: "fail",
-          data: {
-            message: "Invalid email or password. Please try again.",
-          },
+          message: "Invalid email or password. Please try again.",
         });
       }
 
@@ -168,8 +154,8 @@ const login = async (req, res) => {
     res.status(500).json({
       code: 500,
       status: "error",
+      message: "Something went wrong. Please try again.",
       data: {
-        message: "Something went wrong. Please try again.",
         details: error.message,
       },
     });

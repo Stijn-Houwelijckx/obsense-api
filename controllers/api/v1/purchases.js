@@ -8,10 +8,9 @@ const create = async (req, res) => {
     // Check if the user is authenticated and is an artist
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -21,10 +20,9 @@ const create = async (req, res) => {
     // Check if the collection ID is provided
     if (!collectionId) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Collection ID is required",
-        },
+        message: "Collection ID is required",
       });
     }
 
@@ -34,19 +32,17 @@ const create = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "User not found",
-        },
+        message: "User not found",
       });
     }
 
     if (!collection) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Collection not found",
-        },
+        message: "Collection not found",
       });
     }
 
@@ -59,20 +55,18 @@ const create = async (req, res) => {
 
     if (existingPurchase) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "You already own this collection",
-        },
+        message: "You already own this collection",
       });
     }
 
     // Check if the user has enough tokens to purchase the collection
     if (user.tokens < collection.price) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Insufficient tokens",
-        },
+        message: "Insufficient tokens",
       });
     }
 
@@ -93,6 +87,7 @@ const create = async (req, res) => {
     const savedPurchase = await newPurchase.save();
 
     res.status(201).json({
+      code: 201,
       status: "success",
       data: {
         purchase: savedPurchase,
@@ -102,10 +97,10 @@ const create = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
@@ -118,10 +113,9 @@ const index = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -138,6 +132,7 @@ const index = async (req, res) => {
 
     if (!purchases || purchases.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No purchases found",
         data: {
@@ -147,6 +142,7 @@ const index = async (req, res) => {
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         purchases: purchases,
@@ -155,10 +151,10 @@ const index = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });

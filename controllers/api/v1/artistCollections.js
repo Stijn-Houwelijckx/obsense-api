@@ -9,30 +9,27 @@ const create = async (req, res) => {
     // Check if the user is authenticated and is an artist
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
     const currentUser = req.user;
     if (!currentUser.isArtist) {
       return res.status(403).json({
+        code: 403,
         status: "fail",
-        data: {
-          message: "Forbidden: Only artists can create collections.",
-        },
+        message: "Forbidden: Only artists can create collections.",
       });
     }
 
     // Now, assuming the file has been validated already, we can proceed:
     if (!req.file) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "No file uploaded.",
-        },
+        message: "No file uploaded.",
       });
     }
 
@@ -45,48 +42,43 @@ const create = async (req, res) => {
 
     if (!type || !title || !city || !price) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Please fill in all required fields.",
-        },
+        message: "Please fill in all required fields.",
       });
     }
 
     if (type !== "tour" && type !== "exposition") {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Invalid collection type.",
-        },
+        message: "Invalid collection type.",
       });
     }
 
     // Validation for title, description, price
     if (title.length < 1 || title.length > 35) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Title must be between 1 and 35 characters.",
-        },
+        message: "Title must be between 1 and 35 characters.",
       });
     }
 
     if (description && description.length > 1000) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Description cannot exceed 1000 characters.",
-        },
+        message: "Description cannot exceed 1000 characters.",
       });
     }
 
     const priceValue = Number(price);
     if (price < 0 || !Number.isInteger(priceValue)) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Price must be a non-negative integer.",
-        },
+        message: "Price must be a non-negative integer.",
       });
     }
 
@@ -97,10 +89,9 @@ const create = async (req, res) => {
       );
       if (genreIds.length !== genres.length) {
         return res.status(400).json({
+          code: 400,
           status: "fail",
-          data: {
-            message: "Some genres do not exist.",
-          },
+          message: "Some genres do not exist.",
         });
       }
     }
@@ -116,10 +107,9 @@ const create = async (req, res) => {
 
     if (!coverImageResult) {
       return res.status(500).json({
-        status: "fail",
-        data: {
-          message: "Error uploading cover image to Cloudinary",
-        },
+        code: 500,
+        status: "error",
+        message: "Error uploading cover image to Cloudinary",
       });
     }
 
@@ -145,6 +135,7 @@ const create = async (req, res) => {
     const savedCollection = await newCollection.save();
 
     res.status(201).json({
+      code: 201,
       status: "success",
       data: {
         collection: savedCollection,
@@ -153,10 +144,10 @@ const create = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
@@ -169,10 +160,9 @@ const index = async (req, res) => {
     // Check if the user is authenticated and is an artist
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -180,10 +170,9 @@ const index = async (req, res) => {
     const currentUser = req.user;
     if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
+        code: 403,
         status: "fail",
-        data: {
-          message: "Forbidden: Only artists can access their collections.",
-        },
+        message: "Forbidden: Only artists can access their collections.",
       });
     }
 
@@ -193,25 +182,29 @@ const index = async (req, res) => {
       .sort({ createdAt: -1 }); // Optional: Sort by creation date (newest first)
 
     if (!collections || collections.length === 0) {
-      return res.status(404).json({
-        status: "fail",
+      return res.status(204).json({
+        code: 204,
+        status: "success",
+        message: "No collections found.",
         data: {
-          message: "No collections found for this artist.",
+          collections: [],
         },
       });
     }
 
     return res.status(200).json({
+      code: 200,
       status: "success",
-      data: { collections: collections },
+      data: {
+        collections: collections,
+      },
     });
   } catch (error) {
     console.error("Error fetching artist collections:", error);
     return res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching collections.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching collections.",
     });
   }
 };
@@ -222,10 +215,9 @@ const show = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -233,10 +225,9 @@ const show = async (req, res) => {
     const currentUser = req.user;
     if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
+        code: 403,
         status: "fail",
-        data: {
-          message: "Forbidden: Only artists can access their collections.",
-        },
+        message: "Forbidden: Only artists can access their collections.",
       });
     }
 
@@ -257,24 +248,23 @@ const show = async (req, res) => {
 
     if (!collection) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Collection not found or access denied.",
-        },
+        message: "Collection not found or access denied.",
       });
     }
 
     return res.status(200).json({
+      code: 200,
       status: "success",
       data: { collection: collection },
     });
   } catch (error) {
     console.error("Error fetching collection:", error);
     return res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching collection.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching collection.",
     });
   }
 };
@@ -285,10 +275,9 @@ const addObjects = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -296,10 +285,9 @@ const addObjects = async (req, res) => {
     const currentUser = req.user;
     if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
+        code: 403,
         status: "fail",
-        data: {
-          message: "Forbidden: Only artists can add objects to collections.",
-        },
+        message: "Forbidden: Only artists can add objects to collections.",
       });
     }
 
@@ -309,10 +297,9 @@ const addObjects = async (req, res) => {
     // Ensure objectIds is an array
     if (!Array.isArray(objectIds) || objectIds.length === 0) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Please provide an array of object IDs.",
-        },
+        message: "Please provide an array of object IDs.",
       });
     }
 
@@ -326,9 +313,10 @@ const addObjects = async (req, res) => {
     );
     if (missingIds.length > 0) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
+        message: "Some objects do not exist.",
         data: {
-          message: "Some objects do not exist.",
           missingObjectIds: missingIds,
         },
       });
@@ -342,21 +330,18 @@ const addObjects = async (req, res) => {
 
     if (!collection) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Collection not found or access denied.",
-        },
+        message: "Collection not found or access denied.",
       });
     }
 
     // Check if the collection has reached its maxObjects limit
     if (collection.objects.length + objectIds.length > collection.maxObjects) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message:
-            "Maximum objects reached for this collection. Buy more slots.",
-        },
+        message: "Maximum objects reached for this collection. Buy more slots.",
       });
     }
 
@@ -368,11 +353,10 @@ const addObjects = async (req, res) => {
     // If there are no unique IDs to add, return a message
     if (uniqueObjectIds.length === 0) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message:
-            "No new objects to add. All objects are already in the collection.",
-        },
+        message:
+          "No new objects to add. All objects are already in the collection.",
       });
     }
 
@@ -381,6 +365,7 @@ const addObjects = async (req, res) => {
     await collection.save();
 
     return res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         collection: collection,
@@ -389,10 +374,9 @@ const addObjects = async (req, res) => {
   } catch (error) {
     console.error("Error adding objects to collection:", error);
     return res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error adding objects to collection.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error adding objects to collection.",
     });
   }
 };

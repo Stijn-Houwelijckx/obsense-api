@@ -8,10 +8,9 @@ const index = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -41,6 +40,7 @@ const index = async (req, res) => {
 
     if (!collections || collections.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No collections found",
         data: {
@@ -61,6 +61,7 @@ const index = async (req, res) => {
     }));
 
     return res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         collections: processedCollections,
@@ -72,10 +73,9 @@ const index = async (req, res) => {
   } catch (error) {
     console.error("Error fetching collections:", error);
     return res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching collections.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching collections.",
     });
   }
 };
@@ -86,10 +86,9 @@ const indexByCreator = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -107,10 +106,12 @@ const indexByCreator = async (req, res) => {
       .populate("createdBy", "username");
 
     if (!collections || collections.length === 0) {
-      return res.status(404).json({
-        status: "fail",
+      return res.status(204).json({
+        code: 204,
+        status: "success",
+        message: "No collections found",
         data: {
-          message: "No collections found.",
+          collections: [],
         },
       });
     }
@@ -133,16 +134,18 @@ const indexByCreator = async (req, res) => {
     });
 
     return res.status(200).json({
+      code: 200,
       status: "success",
-      data: { collections: processedCollections },
+      data: {
+        collections: processedCollections,
+      },
     });
   } catch (error) {
     console.error("Error fetching collections:", error);
     return res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching collections.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching collections.",
     });
   }
 };
@@ -153,10 +156,9 @@ const indexByGenre = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -179,10 +181,9 @@ const indexByGenre = async (req, res) => {
 
     if (!genre) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Genre not found.",
-        },
+        message: "Genre not found.",
       });
     }
 
@@ -200,6 +201,7 @@ const indexByGenre = async (req, res) => {
 
     if (!collections || collections.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No collections found",
         data: {
@@ -209,6 +211,7 @@ const indexByGenre = async (req, res) => {
     }
 
     return res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         genre: genre.name,
@@ -221,10 +224,9 @@ const indexByGenre = async (req, res) => {
   } catch (error) {
     console.error("Error fetching collections:", error);
     return res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching collections.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching collections.",
     });
   }
 };
@@ -235,10 +237,9 @@ const show = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -254,10 +255,9 @@ const show = async (req, res) => {
 
     if (!collection || !collection.isPublished || !collection.isActive) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Collection not found.",
-        },
+        message: "Collection not found.",
       });
     }
 
@@ -277,16 +277,18 @@ const show = async (req, res) => {
     }
 
     return res.status(200).json({
+      code: 200,
       status: "success",
-      data: { collection: processedCollection },
+      data: {
+        collection: processedCollection,
+      },
     });
   } catch (error) {
     console.error("Error fetching collection:", error);
     return res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching collection.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching collection.",
     });
   }
 };

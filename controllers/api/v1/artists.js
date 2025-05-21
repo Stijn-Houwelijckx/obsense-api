@@ -7,10 +7,9 @@ const index = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -33,6 +32,7 @@ const index = async (req, res) => {
 
     if (!artists || artists.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No artists found",
         data: {
@@ -56,6 +56,7 @@ const index = async (req, res) => {
     );
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         artists: artistsWithCollectionCount,
@@ -67,10 +68,9 @@ const index = async (req, res) => {
   } catch (error) {
     console.error("Error fetching artists:", error);
     res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching artists.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching artists.",
     });
   }
 };
@@ -81,10 +81,9 @@ const show = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -93,10 +92,9 @@ const show = async (req, res) => {
 
     if (!artist) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Artist not found",
-        },
+        message: "Artist not found",
       });
     }
 
@@ -126,6 +124,7 @@ const show = async (req, res) => {
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         artist: artist,
@@ -134,10 +133,9 @@ const show = async (req, res) => {
   } catch (error) {
     console.error("Error fetching artist:", error);
     res.status(500).json({
-      status: "fail",
-      data: {
-        message: "Error fetching artist.",
-      },
+      code: 500,
+      status: "error",
+      message: "Error fetching artist.",
     });
   }
 };

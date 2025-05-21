@@ -5,10 +5,9 @@ const create = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -17,20 +16,18 @@ const create = async (req, res) => {
 
     if (!name) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Name is required.",
-        },
+        message: "Name is required.",
       });
     }
 
     // Validation for name
     if (name.length < 1 || name.length > 35) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Name must be between 1 and 35 characters.",
-        },
+        message: "Name must be between 1 and 35 characters.",
       });
     }
 
@@ -38,10 +35,9 @@ const create = async (req, res) => {
     const regex = /^[a-zA-Z0-9\s-]+$/;
     if (!regex.test(name)) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Name can only contain letters, spaces and hyphens.",
-        },
+        message: "Name can only contain letters, spaces and hyphens.",
       });
     }
 
@@ -52,10 +48,9 @@ const create = async (req, res) => {
     if (existingGenre.length > 0) {
       // Check if the array has any elements
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Genre already exists.",
-        },
+        message: "Genre already exists.",
       });
     }
 
@@ -82,6 +77,7 @@ const create = async (req, res) => {
     const newGenre = await Genre.create({ name: capitalizedGenreName });
 
     res.status(201).json({
+      code: 201,
       status: "success",
       data: {
         genre: newGenre,
@@ -90,10 +86,10 @@ const create = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
@@ -106,10 +102,9 @@ const index = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -118,6 +113,7 @@ const index = async (req, res) => {
 
     if (!genres || genres.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No genres found.",
         data: {
@@ -127,6 +123,7 @@ const index = async (req, res) => {
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         genres: genres,
@@ -135,10 +132,10 @@ const index = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
@@ -150,10 +147,9 @@ const show = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -164,14 +160,14 @@ const show = async (req, res) => {
 
     if (!genre) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Genre not found.",
-        },
+        message: "Genre not found.",
       });
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         genre: genre,
@@ -180,10 +176,10 @@ const show = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });

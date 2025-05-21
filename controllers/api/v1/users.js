@@ -11,9 +11,7 @@ const getCurrentUser = async (req, res) => {
       return res.status(401).json({
         code: 401,
         status: "fail",
-        data: {
-          message: "Authorisation failed. Please sign in again.",
-        },
+        message: "Authorisation failed. Please sign in again.",
       });
     }
 
@@ -28,9 +26,7 @@ const getCurrentUser = async (req, res) => {
       return res.status(404).json({
         code: 404,
         status: "fail",
-        data: {
-          message: "This user could not be found.",
-        },
+        message: "This user could not be found.",
       });
     }
 
@@ -45,8 +41,8 @@ const getCurrentUser = async (req, res) => {
     res.status(500).json({
       code: 500,
       status: "error",
+      message: "This user could not be found. Please try again.",
       data: {
-        message: "This user could not be found. Please try again.",
         details: error.message,
       },
     });
@@ -64,9 +60,7 @@ const changePassword = async (req, res) => {
       return res.status(401).json({
         code: 401,
         status: "fail",
-        data: {
-          message: "Authorisation failed. Please sign in again.",
-        },
+        message: "Authorisation failed. Please sign in again.",
       });
     }
 
@@ -75,9 +69,7 @@ const changePassword = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "Please fill in all required fields.",
-        },
+        message: "Please fill in all required fields.",
       });
     }
 
@@ -87,9 +79,7 @@ const changePassword = async (req, res) => {
       return res.status(404).json({
         code: 404,
         status: "fail",
-        data: {
-          message: "This user could not be found.",
-        },
+        message: "This user could not be found.",
       });
     }
 
@@ -102,9 +92,7 @@ const changePassword = async (req, res) => {
       return res.status(401).json({
         code: 401,
         status: "fail",
-        data: {
-          message: "The old password is incorrect.",
-        },
+        message: "The old password is incorrect.",
       });
     }
 
@@ -113,9 +101,7 @@ const changePassword = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "The new password must be different from the old password.",
-        },
+        message: "The new password must be different from the old password.",
       });
     }
 
@@ -124,9 +110,7 @@ const changePassword = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "The password should be at least 8 characters long.",
-        },
+        message: "The password should be at least 8 characters long.",
       });
     }
 
@@ -135,17 +119,15 @@ const changePassword = async (req, res) => {
       res.status(200).json({
         code: 200,
         status: "success",
-        data: {
-          message: "The password has been changed with success.",
-        },
+        message: "The password has been changed with success.",
       });
     });
   } catch (err) {
     res.status(500).json({
       code: 500,
       status: "error",
+      message: "Something went wrong. Please try again.",
       data: {
-        message: "Something went wrong. Please try again.",
         details: err.message,
       },
     });
@@ -160,9 +142,7 @@ const changeProfilePicture = async (req, res) => {
       return res.status(401).json({
         code: 401,
         status: "fail",
-        data: {
-          message: "Authorisation failed. Please sign in again.",
-        },
+        message: "Authorisation failed. Please sign in again.",
       });
     }
 
@@ -171,9 +151,7 @@ const changeProfilePicture = async (req, res) => {
       return res.status(400).json({
         code: 400,
         status: "fail",
-        data: {
-          message: "There was no file uploaded. Please try again.",
-        },
+        message: "There was no file uploaded. Please try again.",
       });
     }
 
@@ -222,8 +200,8 @@ const changeProfilePicture = async (req, res) => {
     res.status(500).json({
       code: 500,
       status: "error",
+      message: "Something went wrong. Please try again.",
       data: {
-        message: "Something went wrong. Please try again.",
         details: err.message,
       },
     });
@@ -240,8 +218,8 @@ const index = async (req, res) => {
       res.status(204).json({
         code: 204,
         status: "success",
+        message: "No users found.",
         data: {
-          message: "No users found.",
           users: [],
         },
       });
@@ -258,8 +236,8 @@ const index = async (req, res) => {
     res.status(500).json({
       code: 500,
       status: "error",
+      message: "Something went wrong. Please try again.",
       data: {
-        message: "Something went wrong. Please try again.",
         details: err.message,
       },
     });
@@ -272,10 +250,9 @@ const update = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -285,10 +262,9 @@ const update = async (req, res) => {
     // Validate input data
     if (!firstName || !lastName || !username || !email) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "All fields are required",
-        },
+        message: "All fields are required",
       });
     }
 
@@ -299,10 +275,9 @@ const update = async (req, res) => {
     });
     if (existingUser) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "username already exists",
-        },
+        message: "username already exists",
       });
     }
 
@@ -313,10 +288,9 @@ const update = async (req, res) => {
     });
     if (existingUserEmail) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "User already exists",
-        },
+        message: "User already exists",
       });
     }
 
@@ -324,10 +298,9 @@ const update = async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Please enter a valid email",
-        },
+        message: "Please enter a valid email",
       });
     }
 
@@ -340,26 +313,26 @@ const update = async (req, res) => {
 
     if (!updatedUser) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "User not found",
-        },
+        message: "User not found",
       });
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
+      message: "User profile updated successfully",
       data: {
-        message: "User profile updated successfully",
         user: updatedUser,
       },
     });
   } catch (err) {
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
@@ -372,10 +345,9 @@ const destroy = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -384,25 +356,23 @@ const destroy = async (req, res) => {
 
     if (!deletedUser) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "User not found",
-        },
+        message: "User not found",
       });
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
-      data: {
-        message: "User account deleted successfully",
-      },
+      message: "User account deleted successfully",
     });
   } catch (err) {
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });

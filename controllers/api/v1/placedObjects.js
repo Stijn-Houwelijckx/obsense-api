@@ -8,20 +8,18 @@ const save = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
     const currentUser = req.user;
     if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
+        code: 403,
         status: "fail",
-        data: {
-          message: "Forbidden: Only artists can access their collections.",
-        },
+        message: "Forbidden: Only artists can access their collections.",
       });
     }
 
@@ -51,10 +49,9 @@ const save = async (req, res) => {
       !origin.heading === undefined
     ) {
       return res.status(400).json({
+        code: 400,
         status: "fail",
-        data: {
-          message: "Missing required fields",
-        },
+        message: "Missing required fields",
       });
     }
 
@@ -66,10 +63,9 @@ const save = async (req, res) => {
 
     if (!collection) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Collection not found or does not belong to the user",
-        },
+        message: "Collection not found or does not belong to the user",
       });
     }
 
@@ -81,10 +77,9 @@ const save = async (req, res) => {
 
     if (!object) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Object not found or does not belong to the user",
-        },
+        message: "Object not found or does not belong to the user",
       });
     }
 
@@ -107,9 +102,10 @@ const save = async (req, res) => {
       const updatedPlacedObject = await existingPlacedObject.save();
 
       return res.status(200).json({
+        code: 200,
         status: "success",
+        message: "Placed object updated successfully",
         data: {
-          message: "Placed object updated successfully",
           placedObject: updatedPlacedObject,
         },
       });
@@ -126,9 +122,10 @@ const save = async (req, res) => {
       });
 
       return res.status(201).json({
+        code: 201,
         status: "success",
+        message: "Placed object created successfully",
         data: {
-          message: "Placed object created successfully",
           placedObject: newPlacedObject,
         },
       });
@@ -136,10 +133,10 @@ const save = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
@@ -152,10 +149,9 @@ const indexByCollection = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
@@ -168,10 +164,9 @@ const indexByCollection = async (req, res) => {
 
     if (!collection) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Collection not found",
-        },
+        message: "Collection not found",
       });
     }
 
@@ -182,6 +177,7 @@ const indexByCollection = async (req, res) => {
 
     if (!placedObjects || placedObjects.length === 0) {
       return res.status(204).json({
+        code: 204,
         status: "success",
         message: "No placed objects found in this collection.",
         data: {
@@ -191,6 +187,7 @@ const indexByCollection = async (req, res) => {
     }
 
     res.status(200).json({
+      code: 200,
       status: "success",
       data: {
         placedObjects: placedObjects,
@@ -199,10 +196,10 @@ const indexByCollection = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
@@ -216,30 +213,27 @@ const destroy = async (req, res) => {
     // Check if the user is authenticated
     if (!req.user) {
       return res.status(401).json({
+        code: 401,
         status: "fail",
-        data: {
-          message: "Unauthorized",
-        },
+        message: "Unauthorized",
       });
     }
 
     const currentUser = req.user;
     if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
+        code: 403,
         status: "fail",
-        data: {
-          message: "Forbidden: Only artists can access their collections.",
-        },
+        message: "Forbidden: Only artists can access their collections.",
       });
     }
 
     // Check if the ID is a valid MongoDB ObjectId, if not return 404
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Placed object not found",
-        },
+        message: "Placed object not found",
       });
     }
 
@@ -247,10 +241,9 @@ const destroy = async (req, res) => {
     const placedObject = await PlacedObject.findById(id);
     if (!placedObject) {
       return res.status(404).json({
+        code: 404,
         status: "fail",
-        data: {
-          message: "Placed object not found",
-        },
+        message: "Placed object not found",
       });
     }
 
@@ -262,11 +255,10 @@ const destroy = async (req, res) => {
 
     if (!collection) {
       return res.status(403).json({
+        code: 403,
         status: "fail",
-        data: {
-          message:
-            "Forbidden: You do not have permission to delete this placed object.",
-        },
+        message:
+          "Forbidden: You do not have permission to delete this placed object.",
       });
     }
 
@@ -274,18 +266,17 @@ const destroy = async (req, res) => {
     await PlacedObject.deleteOne({ _id: id });
 
     res.status(200).json({
+      code: 200,
       status: "success",
-      data: {
-        message: "Placed object deleted successfully",
-      },
+      message: "Placed object deleted successfully",
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({
+      code: 500,
       status: "error",
       message: "Server error",
       data: {
-        code: 500,
         details: err.message,
       },
     });
