@@ -1,4 +1,5 @@
 const Collection = require("../../../models/api/v1/Collection");
+const Object = require("../../../models/api/v1/Object");
 const Genre = require("../../../models/api/v1/Genre");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
 
@@ -311,6 +312,24 @@ const addObjects = async (req, res) => {
         status: "fail",
         data: {
           message: "Please provide an array of object IDs.",
+        },
+      });
+    }
+
+    // Verify that the object IDs exist in the database
+    const foundObjects = await Object.find({
+      _id: { $in: objectIds },
+    }).distinct("_id");
+    const missingIds = objectIds.filter(
+      (id) =>
+        !foundObjects.map((objId) => objId.toString()).includes(id.toString())
+    );
+    if (missingIds.length > 0) {
+      return res.status(404).json({
+        status: "fail",
+        data: {
+          message: "Some objects do not exist.",
+          missingObjectIds: missingIds,
         },
       });
     }
