@@ -205,6 +205,7 @@ const indexByGenre = async (req, res) => {
         status: "success",
         message: "No collections found",
         data: {
+          genre: genre.name,
           collections: [],
         },
       });
