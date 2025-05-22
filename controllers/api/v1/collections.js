@@ -200,7 +200,7 @@ const indexByGenre = async (req, res) => {
       .lean();
 
     if (!collections || collections.length === 0) {
-      return res.status(204).json({
+      return res.status(200).json({
         code: 204,
         status: "success",
         message: "No collections found",
