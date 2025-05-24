@@ -175,7 +175,128 @@ const indexByCollection = async (req, res) => {
   }
 };
 
+const show = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
+      return res.status(403).json({
+        code: 403,
+        status: "fail",
+        message: "Forbidden: Only artists can access their collections.",
+      });
+    }
+
+    const { id } = req.params;
+
+    // Find the collection by ID and ensure it belongs to the current user
+    const object = await Object.findOne({
+      _id: id,
+      uploadedBy: req.user._id,
+    })
+      .populate("uploadedBy", "username") // Only populate 'username' field in createdBy
+      .lean();
+
+    if (!object) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Object not found or access denied.",
+      });
+    }
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: { object: object },
+    });
+  } catch (error) {
+    console.error("Error fetching object:", error);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Error fetching object.",
+    });
+  }
+};
+
+const update = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    const { title, description } = req.body.object;
+    const id = req.params.id; // Get the object ID from the request parameters
+    const user = req.user; // Get the user ID from the request object
+
+    // check if user owns object
+    const object = await Object.findOne({ _id: id, uploadedBy: user._id });
+    if (!object) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Object not found or access denied.",
+      });
+    }
+
+    // Validate input data
+    if (!title || !description) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "All fields are required",
+      });
+    }
+
+    // update the object
+    object.title = title;
+    object.description = description;
+    const updatedObject = await object.save();
+    if (!updatedObject) {
+      return res.status(500).json({
+        code: 500,
+        status: "error",
+        message: "Error updating object",
+      });
+    }
+
+    res.status(200).json({
+      code: 200,
+      status: "success",
+      data: {
+        object: updatedObject,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: {
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   create,
   indexByCollection,
+  show,
+  update,
 };

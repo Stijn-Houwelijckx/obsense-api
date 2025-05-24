@@ -22,4 +22,17 @@ router.get(
   objectController.indexByCollection
 );
 
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  objectController.show
+);
+
+// update title and description of an object
+router.put(
+  "/:id",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  objectController.update
+);
+
 module.exports = router;
