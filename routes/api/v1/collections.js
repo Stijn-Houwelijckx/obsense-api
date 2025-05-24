@@ -31,4 +31,11 @@ router.get(
   collectionController.show // Controller to get a single collection
 );
 
+// Like a collection
+router.post(
+  "/:id/like",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  collectionController.likeCollection // Controller to like a collection
+);
+
 module.exports = router;

@@ -294,9 +294,68 @@ const show = async (req, res) => {
   }
 };
 
+// Like a collection
+const likeCollection = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    const collectionId = req.params.id;
+    const userId = req.user._id;
+
+    // Find the collection
+    const collection = await Collection.findById(collectionId);
+
+    if (!collection || !collection.isPublished || !collection.isActive) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Collection not found.",
+      });
+    }
+
+    const alreadyLiked = collection.likes.includes(userId);
+
+    if (alreadyLiked) {
+      // User has already liked the collection, remove the like
+      collection.likes = collection.likes.filter(
+        (id) => id.toString() !== userId.toString()
+      );
+    } else {
+      // User has not liked the collection, add the like
+      collection.likes.push(userId);
+    }
+
+    await collection.save();
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: {
+        liked: !alreadyLiked,
+        likesCount: collection.likes.length,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating like status:", error);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Error updating like status.",
+    });
+  }
+};
+
 module.exports = {
   index,
   indexByCreator,
   indexByGenre,
   show,
+  likeCollection,
 };
