@@ -277,10 +277,14 @@ const show = async (req, res) => {
       processedCollection.ratings = 0;
     }
 
+    // Check if the user has liked the collection
+    const liked = collection.likes.includes(req.user._id);
+
     return res.status(200).json({
       code: 200,
       status: "success",
       data: {
+        liked: liked,
         collection: processedCollection,
       },
     });
