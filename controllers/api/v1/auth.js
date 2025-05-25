@@ -129,8 +129,8 @@ const login = async (req, res) => {
     await User.authenticate()(email, password).then((user) => {
       // If user is not found
       if (user.user === false) {
-        return res.status(400).json({
-          code: 400,
+        return res.status(401).json({
+          code: 401,
           status: "fail",
           message: "Invalid email or password. Please try again.",
         });
