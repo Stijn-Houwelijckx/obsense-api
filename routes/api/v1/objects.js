@@ -40,4 +40,10 @@ router.put(
   objectController.update
 );
 
+router.delete(
+  "/:id",
+  passport.authenticate("jwt", { session: false }), // authenticatie
+  objectController.deleteObject
+);
+
 module.exports = router;

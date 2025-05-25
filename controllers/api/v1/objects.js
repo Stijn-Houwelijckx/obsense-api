@@ -336,10 +336,60 @@ const update = async (req, res) => {
   }
 };
 
+const deleteObject = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    const objectId = req.params.id;
+    const currentUser = req.user;
+
+    // Zoek het object en check of het toebehoort aan de huidige gebruiker
+    const object = await Object.findOne({
+      _id: objectId,
+      uploadedBy: currentUser._id,
+    });
+
+    if (!object) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Object not found or access denied.",
+      });
+    }
+
+    // Optioneel: verwijder het bestand ook uit Cloudinary
+    // (als je een functie hebt om dat te doen, bv. `deleteFromCloudinary(object.file.fileName)`)
+
+    // Verwijder het object uit de database
+    await object.deleteOne();
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      message: "Object deleted successfully.",
+    });
+  } catch (err) {
+    console.error("Error deleting object:", err);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: { details: err.message },
+    });
+  }
+};
+
 module.exports = {
   create,
   index,
   indexByCollection,
   show,
   update,
+  deleteObject,
 };
