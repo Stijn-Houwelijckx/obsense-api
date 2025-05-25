@@ -1,6 +1,7 @@
 const Object = require("../../../models/api/v1/Object");
 const Collection = require("../../../models/api/v1/Collection");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
+const deleteFromCloudinary = require("../../../utils/deleteFromCloudinary");
 
 const create = async (req, res) => {
   try {
@@ -157,6 +158,7 @@ const index = async (req, res) => {
     });
   }
 };
+
 // Get all objects by collection
 const indexByCollection = async (req, res) => {
   try {
@@ -385,6 +387,104 @@ const deleteObject = async (req, res) => {
   }
 };
 
+const setThumbnail = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "No file uploaded.",
+      });
+    }
+
+    // Find the object by ID and ensure it belongs to the current user
+    const object = await Object.findOne({
+      _id: id,
+      uploadedBy: req.user._id,
+    });
+    if (!object) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Object not found or access denied.",
+      });
+    }
+
+    // If there is already a thumbnail, delete the old one
+    if (object.thumbnail && object.thumbnail.fileName) {
+      try {
+        await deleteFromCloudinary(object.thumbnail.fileName, "image");
+      } catch (err) {
+        console.warn(
+          "Failed to delete old thumbnail from Cloudinary:",
+          err.message
+        );
+        // Not a fatal error, continue
+      }
+    }
+
+    // If file is valid, upload it to Cloudinary
+    const objectThumbnailFileResult = await uploadToCloudinary(
+      req.file.path,
+      "objectThumbnail",
+      req.file.originalname
+    );
+
+    if (!objectThumbnailFileResult) {
+      return res.status(500).json({
+        code: 500,
+        status: "error",
+        message: "Error uploading thumbnail to Cloudinary",
+      });
+    }
+
+    // Update the object's thumbnail information
+    object.thumbnail = {
+      fileName: objectThumbnailFileResult.public_id, // Cloudinary public ID
+      filePath: objectThumbnailFileResult.url, // Cloudinary secure URL
+      fileType: objectThumbnailFileResult.format, // File format from Cloudinary
+      fileSize: objectThumbnailFileResult.bytes, // File size from Cloudinary (in bytes)
+    };
+
+    // Save the updated object
+    const updatedObject = await object.save();
+
+    if (!updatedObject) {
+      return res.status(500).json({
+        code: 500,
+        status: "error",
+        message: "Error saving thumbnail to object.",
+      });
+    }
+
+    res.status(200).json({
+      code: 200,
+      status: "success",
+      data: {
+        object: updatedObject,
+      },
+    });
+  } catch (error) {
+    console.error("Error setting thumbnail:", error);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Error setting thumbnail.",
+    });
+  }
+};
+
 module.exports = {
   create,
   index,
@@ -392,4 +492,5 @@ module.exports = {
   show,
   update,
   deleteObject,
+  setThumbnail,
 };

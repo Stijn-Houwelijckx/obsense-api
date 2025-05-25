@@ -12,7 +12,7 @@ router.post(
     ["application/octet-stream", "model/gltf-binary"], // MIME types for GLB
     20 * 1024 * 1024, // File size validation for object image (20MB)
     "3DObject"
-  ), // File validation for cover image (1MB)
+  ),
   objectController.create // Controller to handle collection creation
 );
 
@@ -44,6 +44,18 @@ router.delete(
   "/:id",
   passport.authenticate("jwt", { session: false }), // authenticatie
   objectController.deleteObject
+);
+
+router.post(
+  "/:id/thumbnail",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  validateFile(
+    /\.(jpg|jpeg|png)$/i, // Allow only image files
+    ["image/jpeg", "image/png"], // MIME types for images
+    1 * 1024 * 1024, // File size validation for thumbnail (1MB)
+    "ObjectThumbnail"
+  ), // File validation for thumbnail
+  objectController.setThumbnail // Controller to handle thumbnail upload
 );
 
 module.exports = router;
