@@ -351,7 +351,7 @@ const deleteObject = async (req, res) => {
     const objectId = req.params.id;
     const currentUser = req.user;
 
-    // Zoek het object en check of het toebehoort aan de huidige gebruiker
+    // Validate the object ID
     const object = await Object.findOne({
       _id: objectId,
       uploadedBy: currentUser._id,
@@ -365,10 +365,32 @@ const deleteObject = async (req, res) => {
       });
     }
 
-    // Optioneel: verwijder het bestand ook uit Cloudinary
-    // (als je een functie hebt om dat te doen, bv. `deleteFromCloudinary(object.file.fileName)`)
+    // Delete the file from Cloudinary
+    try {
+      await deleteFromCloudinary(object.file.fileName, "object");
+    } catch (err) {
+      console.error("Failed to delete file from Cloudinary:", err.message);
+      return res.status(500).json({
+        code: 500,
+        status: "error",
+        message: "Error deleting file from Cloudinary",
+        data: { details: err.message },
+      });
+    }
 
-    // Verwijder het object uit de database
+    // Delete the thumbnail if it exists
+    if (object.thumbnail && object.thumbnail.fileName) {
+      try {
+        await deleteFromCloudinary(object.thumbnail.fileName, "image");
+      } catch (err) {
+        console.warn(
+          "Failed to delete thumbnail from Cloudinary:",
+          err.message
+        );
+        // Not a fatal error, continue
+      }
+    }
+
     await object.deleteOne();
 
     return res.status(200).json({
