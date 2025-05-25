@@ -12,6 +12,12 @@ const ObjectSchema = new Schema(
       fileType: { type: String, required: true },
       fileSize: { type: Number, required: true },
     },
+    thumbnail: {
+      fileName: { type: String, required: false, default: null },
+      filePath: { type: String, required: false, default: null },
+      fileType: { type: String, required: false, default: null },
+      fileSize: { type: Number, required: false, default: null },
+    },
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt
 );
