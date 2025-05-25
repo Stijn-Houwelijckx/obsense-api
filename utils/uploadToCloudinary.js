@@ -24,6 +24,9 @@ const uploadToCloudinary = async (filePath, fileType, originalFileName) => {
       case "coverImage":
         folder = "cover_images";
         break;
+      case "objectThumbnail":
+        folder = "object_thumbnails";
+        break;
       case "object":
         folder = "objects";
         resourceType = "raw"; // Cloudinary treats 3D models as "raw"
