@@ -115,6 +115,48 @@ const create = async (req, res) => {
   }
 };
 
+const index = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    const userObjects = await Object.find({ uploadedBy: req.user._id }).lean();
+
+    if (!userObjects || userObjects.length === 0) {
+      return res.status(204).json({
+        code: 204,
+        status: "success",
+        message: "No objects.",
+        data: {
+          objects: [],
+        },
+      });
+    }
+
+    res.status(200).json({
+      code: 200,
+      status: "success",
+      data: {
+        objects: userObjects,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: {
+        details: err.message,
+      },
+    });
+  }
+};
 // Get all objects by collection
 const indexByCollection = async (req, res) => {
   try {
@@ -296,6 +338,7 @@ const update = async (req, res) => {
 
 module.exports = {
   create,
+  index,
   indexByCollection,
   show,
   update,

@@ -28,6 +28,11 @@ router.get(
   objectController.show
 );
 
+router.get(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  objectController.index
+);
 // update title and description of an object
 router.put(
   "/:id",
