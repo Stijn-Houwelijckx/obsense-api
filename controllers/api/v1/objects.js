@@ -116,7 +116,7 @@ const create = async (req, res) => {
   }
 };
 
-const index = async (req, res) => {
+const indexByCreator = async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -509,7 +509,7 @@ const setThumbnail = async (req, res) => {
 
 module.exports = {
   create,
-  index,
+  indexByCreator,
   indexByCollection,
   show,
   update,

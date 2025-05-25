@@ -29,9 +29,9 @@ router.get(
 );
 
 router.get(
-  "/",
+  "/", // If another index route is needed, call this one /me
   passport.authenticate("jwt", { session: false }),
-  objectController.index
+  objectController.indexByCreator
 );
 // update title and description of an object
 router.put(
