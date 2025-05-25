@@ -10,9 +10,15 @@ router.post(
 );
 
 router.get(
-  "/:collectionId",
+  "/collections/:collectionId",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
   placedObjectController.indexByCollection
+);
+
+router.get(
+  "/:id",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  placedObjectController.show
 );
 
 router.delete(

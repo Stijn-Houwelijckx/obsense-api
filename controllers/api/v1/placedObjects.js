@@ -283,8 +283,68 @@ const destroy = async (req, res) => {
   }
 };
 
+const show = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Check if the ID is a valid MongoDB ObjectId, if not return 404
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Placed object not found",
+      });
+    }
+
+    // Find the placed object by ID
+    const placedObject = await PlacedObject.findById(id)
+      .select("object")
+      .populate({
+        path: "object",
+        select: "title description",
+      })
+      .lean();
+
+    if (!placedObject) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Placed object not found",
+      });
+    }
+
+    res.status(200).json({
+      code: 200,
+      status: "success",
+      data: {
+        placedObject: placedObject,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: {
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   save,
   indexByCollection,
+  show,
   destroy,
 };
