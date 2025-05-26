@@ -310,7 +310,7 @@ const show = async (req, res) => {
       .select("object")
       .populate({
         path: "object",
-        select: "title description",
+        select: "title description thumbnail",
       })
       .lean();
 
