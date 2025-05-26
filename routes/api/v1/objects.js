@@ -53,7 +53,7 @@ router.post(
     /\.(jpg|jpeg|png)$/i, // Allow only image files
     ["image/jpeg", "image/png"], // MIME types for images
     1 * 1024 * 1024, // File size validation for thumbnail (1MB)
-    "ObjectThumbnail"
+    "objectThumbnail"
   ), // File validation for thumbnail
   objectController.setThumbnail // Controller to handle thumbnail upload
 );
