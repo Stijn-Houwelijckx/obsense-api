@@ -25,26 +25,26 @@ const signup = async (req, res) => {
       });
     }
 
-    // Check if email already exists
-    const existingUser = await User.findOne({ email: email });
-    if (existingUser) {
-      return res.status(400).json({
-        code: 400,
-        status: "fail",
-        message: "This email is already in use. Please try again.",
-      });
-    }
+    // Check if email or username already exists
+    const existingEmailUser = await User.findOne({ email: email });
+    const existingUsernameUser = username
+      ? await User.findOne({ username: username })
+      : null;
 
-    // Check if username already exists
-    if (username) {
-      const existingUser = await User.findOne({ username: username });
-      if (existingUser) {
-        return res.status(400).json({
-          code: 400,
-          status: "fail",
-          message: "This username already exists. Please try again.",
-        });
+    if (existingEmailUser || existingUsernameUser) {
+      const data = {};
+      if (existingEmailUser) {
+        data.email = "This email is already in use. Please try again.";
       }
+      if (existingUsernameUser) {
+        data.username = "This username already exists. Please try again.";
+      }
+      return res.status(409).json({
+        code: 409,
+        status: "fail",
+        message: "Credentials already exist.",
+        data,
+      });
     }
 
     // Check if password is long enough
