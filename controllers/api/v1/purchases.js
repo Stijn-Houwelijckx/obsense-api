@@ -67,6 +67,9 @@ const create = async (req, res) => {
         code: 400,
         status: "fail",
         message: "Insufficient tokens",
+        data: {
+          tokens: "Insufficient tokens",
+        },
       });
     }
 
