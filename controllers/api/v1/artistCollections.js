@@ -381,10 +381,56 @@ const addObjects = async (req, res) => {
   }
 };
 
+const deleteCollection = async (req, res) => {
+  try {
+    // Check user authentication + artist role
+    if (!req.user || !req.user.isArtist) {
+      return res.status(403).json({
+        code: 403,
+        status: "fail",
+        message: "Forbidden: Only artists can delete collections.",
+      });
+    }
+
+    const { id } = req.params;
+
+    // Zoek collectie die hoort bij ingelogde user
+    const collection = await Collection.findOne({
+      _id: id,
+      createdBy: req.user._id,
+    });
+
+    if (!collection) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Collection not found or access denied.",
+      });
+    }
+
+    // Verwijder collectie
+    await collection.deleteOne();
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      message: "Collection deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting collection:", error);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: { details: error.message },
+    });
+  }
+};
+
 module.exports = {
   create,
   index,
   show,
-
   addObjects,
+  deleteCollection,
 };

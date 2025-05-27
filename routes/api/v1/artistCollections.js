@@ -42,4 +42,14 @@ router.patch(
   artistCollectionController.addObjects // Controller to add objects to a collection
 );
 
+router.delete(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res, next) => {
+    console.log("DELETE route triggered for id:", req.params.id);
+    next();
+  },
+  artistCollectionController.deleteCollection
+);
+
 module.exports = router;
