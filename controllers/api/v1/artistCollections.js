@@ -427,10 +427,135 @@ const deleteCollection = async (req, res) => {
   }
 };
 
+const updateCollection = async (req, res) => {
+  try {
+    // Check user authentication + artist role
+    if (!req.user || !req.user.isArtist) {
+      return res.status(403).json({
+        code: 403,
+        status: "fail",
+        message: "Forbidden: Only artists can update collections.",
+      });
+    }
+
+    const { id } = req.params;
+
+    // Parse input data (moet client side als JSON gestuurd worden)
+    // Bijvoorbeeld via Content-Type: application/json
+    const {
+      type,
+      title,
+      description,
+      city,
+      price,
+      genres,
+      isActive,
+      isPublished,
+      maxObjects,
+      // etc. voeg toe wat je wil updaten
+    } = req.body;
+
+    // Valideer verplichte velden (indien nodig)
+    if (type && !["tour", "exposition"].includes(type.toLowerCase())) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "Invalid collection type.",
+      });
+    }
+
+    if (title && (title.length < 1 || title.length > 35)) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "Title must be between 1 and 35 characters.",
+      });
+    }
+
+    if (description && description.length > 1000) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "Description cannot exceed 1000 characters.",
+      });
+    }
+
+    if (price !== undefined) {
+      const priceValue = Number(price);
+      if (priceValue < 0 || !Number.isInteger(priceValue)) {
+        return res.status(400).json({
+          code: 400,
+          status: "fail",
+          message: "Price must be a non-negative integer.",
+        });
+      }
+    }
+
+    // Check genres bestaan als genres zijn opgegeven
+    if (genres && genres.length > 0) {
+      const genreIds = await Genre.find({ _id: { $in: genres } }).distinct(
+        "_id"
+      );
+      if (genreIds.length !== genres.length) {
+        return res.status(400).json({
+          code: 400,
+          status: "fail",
+          message: "Some genres do not exist.",
+        });
+      }
+    }
+
+    // Zoek collectie, controleer eigenaar
+    const collection = await Collection.findOne({
+      _id: id,
+      createdBy: req.user._id,
+    });
+
+    if (!collection) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Collection not found or access denied.",
+      });
+    }
+
+    // Update velden indien meegegeven
+    if (type) collection.type = type.toLowerCase();
+    if (title) collection.title = title;
+    if (description !== undefined) collection.description = description;
+    if (city) collection.city = city;
+    if (price !== undefined) collection.price = Number(price);
+    if (genres) collection.genres = genres;
+    if (isActive !== undefined) collection.isActive = isActive;
+    if (isPublished !== undefined) collection.isPublished = isPublished;
+    if (maxObjects !== undefined) collection.maxObjects = maxObjects;
+
+    // Opslaan
+    const updatedCollection = await collection.save();
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: {
+        collection: updatedCollection,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating collection:", error);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: { details: error.message },
+    });
+  }
+};
+
 module.exports = {
   create,
   index,
   show,
   addObjects,
   deleteCollection,
+  updateCollection,
 };

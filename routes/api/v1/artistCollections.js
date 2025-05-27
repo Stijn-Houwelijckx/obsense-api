@@ -42,6 +42,12 @@ router.patch(
   artistCollectionController.addObjects // Controller to add objects to a collection
 );
 
+router.put(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  artistCollectionController.updateCollection
+);
+
 router.delete(
   "/:id",
   passport.authenticate("jwt", { session: false }),
