@@ -268,29 +268,29 @@ const update = async (req, res) => {
       });
     }
 
-    // Check if username is unique
-    const existingUser = await User.findOne({
-      username: username,
-      _id: { $ne: user._id },
-    });
-    if (existingUser) {
-      return res.status(400).json({
-        code: 400,
-        status: "fail",
-        message: "username already exists",
-      });
-    }
-
-    // Check if user already exists
-    const existingUserEmail = await User.findOne({
+    // Check if email or username already exists
+    const existingEmailUser = await User.findOne({
       email: email,
       _id: { $ne: user._id },
     });
-    if (existingUserEmail) {
-      return res.status(400).json({
-        code: 400,
+    const existingUsernameUser = await User.findOne({
+      username: username,
+      _id: { $ne: user._id },
+    });
+
+    if (existingEmailUser || existingUsernameUser) {
+      const data = {};
+      if (existingEmailUser) {
+        data.email = "This email is already in use. Please try again.";
+      }
+      if (existingUsernameUser) {
+        data.username = "This username already exists. Please try again.";
+      }
+      return res.status(409).json({
+        code: 409,
         status: "fail",
-        message: "User already exists",
+        message: "Credentials already exist.",
+        data,
       });
     }
 
