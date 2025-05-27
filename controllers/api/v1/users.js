@@ -93,6 +93,9 @@ const changePassword = async (req, res) => {
         code: 401,
         status: "fail",
         message: "The old password is incorrect.",
+        data: {
+          oldPassword: "The old password is incorrect.",
+        },
       });
     }
 
