@@ -409,6 +409,37 @@ const deleteObject = async (req, res) => {
   }
 };
 
+const deleteThumbnail = async (req, res) => {
+  const objectId = req.params.id;
+
+  try {
+    const object = await Object.findById(objectId);
+    if (!object) {
+      return res.status(404).json({ message: "Object niet gevonden" });
+    }
+
+    // Optioneel: verwijder ook thumbnail uit Cloudinary als dat nodig is
+    if (object.thumbnail && object.thumbnail.fileName) {
+      try {
+        await deleteFromCloudinary(object.thumbnail.fileName, "image");
+      } catch (err) {
+        console.warn(
+          "Failed to delete thumbnail from Cloudinary:",
+          err.message
+        );
+      }
+    }
+
+    object.thumbnail = null;
+    await object.save();
+
+    res.status(200).json({ message: "Thumbnail verwijderd" });
+  } catch (error) {
+    console.error("Error deleting thumbnail:", error);
+    res.status(500).json({ message: "Fout bij verwijderen thumbnail" });
+  }
+};
+
 const setThumbnail = async (req, res) => {
   try {
     // Check if the user is authenticated
@@ -515,4 +546,5 @@ module.exports = {
   update,
   deleteObject,
   setThumbnail,
+  deleteThumbnail,
 };

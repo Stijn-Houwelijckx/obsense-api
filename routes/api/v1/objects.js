@@ -58,4 +58,10 @@ router.post(
   objectController.setThumbnail // Controller to handle thumbnail upload
 );
 
+router.delete(
+  "/:id/thumbnail",
+  passport.authenticate("jwt", { session: false }),
+  objectController.deleteThumbnail
+);
+
 module.exports = router;
