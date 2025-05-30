@@ -382,6 +382,52 @@ const destroy = async (req, res) => {
   }
 };
 
+const makeArtist = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Update the user's isArtist field to true
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { isArtist: true },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      code: 200,
+      status: "success",
+      message: "User has been made an artist successfully.",
+      data: {
+        user: updatedUser,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: {
+        details: err.message,
+      },
+    });
+  }
+};
+
 module.exports = {
   getCurrentUser,
   changePassword,
@@ -389,4 +435,5 @@ module.exports = {
   index,
   update,
   destroy,
+  makeArtist,
 };

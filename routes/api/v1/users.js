@@ -46,6 +46,13 @@ router.put(
   userController.changeProfilePicture
 );
 
+// Update profile data of authenticated user
+router.patch(
+  "/me/make-artist",
+  passport.authenticate("jwt", { session: false }),
+  userController.makeArtist
+);
+
 // Get all users
 router.get("/", userController.index);
 
