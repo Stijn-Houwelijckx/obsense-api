@@ -126,7 +126,9 @@ const indexByCreator = async (req, res) => {
       });
     }
 
-    const userObjects = await Object.find({ uploadedBy: req.user._id }).lean();
+    const userObjects = await Object.find({ uploadedBy: req.user._id })
+      .sort({ createdAt: -1 })
+      .lean();
 
     if (!userObjects || userObjects.length === 0) {
       return res.status(204).json({
