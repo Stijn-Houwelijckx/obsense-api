@@ -23,17 +23,17 @@ router.get(
 );
 
 router.get(
+  "/", // If another index route is needed, call this one /me
+  passport.authenticate("jwt", { session: false }),
+  objectController.indexByCreator
+);
+
+router.get(
   "/:id",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
   objectController.show
 );
 
-router.get(
-  "/", // If another index route is needed, call this one /me
-  passport.authenticate("jwt", { session: false }),
-  objectController.indexByCreator
-);
-// update title and description of an object
 router.put(
   "/:id",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
@@ -43,7 +43,7 @@ router.put(
 router.delete(
   "/:id",
   passport.authenticate("jwt", { session: false }), // authenticatie
-  objectController.deleteObject
+  objectController.destroy
 );
 
 router.post(

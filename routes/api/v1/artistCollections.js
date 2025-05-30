@@ -51,13 +51,13 @@ router.put(
     1 * 1024 * 1024,
     "coverImage"
   ),
-  artistCollectionController.updateCollection
+  artistCollectionController.update
 );
 
 router.delete(
   "/:id",
   passport.authenticate("jwt", { session: false }),
-  artistCollectionController.deleteCollection
+  artistCollectionController.destroy
 );
 
 module.exports = router;
