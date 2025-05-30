@@ -45,6 +45,12 @@ router.patch(
 router.put(
   "/:id",
   passport.authenticate("jwt", { session: false }),
+  validateFile(
+    /\.jpg$|\.jpeg$|\.png$/i,
+    ["image/jpeg", "image/png"],
+    1 * 1024 * 1024,
+    "coverImage"
+  ),
   artistCollectionController.updateCollection
 );
 

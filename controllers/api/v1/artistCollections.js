@@ -459,12 +459,14 @@ const updateCollection = async (req, res) => {
       return res.status(403).json({
         code: 403,
         status: "fail",
-        message: "Forbidden: Only artists can add objects to collections.",
+        message: "Forbidden: Only artists can update collections.",
       });
     }
 
+    const data = JSON.parse(req.body.collection);
+
     const { id } = req.params;
-    const { title, description, city, price, genres } = req.body;
+    const { title, description, city, price, genres } = data.collection;
 
     // Validation for title, description, price
     if (title.length < 1 || title.length > 35) {
@@ -519,6 +521,35 @@ const updateCollection = async (req, res) => {
         message: "Collection not found or access denied.",
       });
     }
+
+    // --- Handle optional cover image update ---
+    if (req.file) {
+      // Delete old image from Cloudinary if it exists
+      if (collection.coverImage && collection.coverImage.fileName) {
+        await deleteFromCloudinary(collection.coverImage.fileName);
+      }
+      // Upload new image
+      const coverImageResult = await uploadToCloudinary(
+        req.file.path,
+        "coverImage",
+        req.file.originalname
+      );
+      if (!coverImageResult) {
+        return res.status(500).json({
+          code: 500,
+          status: "error",
+          message: "Error uploading cover image to Cloudinary",
+        });
+      }
+      // Update coverImage field
+      collection.coverImage = {
+        fileName: coverImageResult.public_id,
+        filePath: coverImageResult.url,
+        fileType: coverImageResult.format,
+        fileSize: coverImageResult.bytes,
+      };
+    }
+    // If no file, keep the existing coverImage
 
     // Update collection fields
     collection.title = title;
