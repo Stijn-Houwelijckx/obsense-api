@@ -2,6 +2,7 @@ const Collection = require("../../../models/api/v1/Collection");
 const Object = require("../../../models/api/v1/Object");
 const Genre = require("../../../models/api/v1/Genre");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
+const deleteFromCloudinary = require("../../../utils/deleteFromCloudinary");
 
 // Controller to create a new collection
 const create = async (req, res) => {
@@ -383,8 +384,18 @@ const addObjects = async (req, res) => {
 
 const deleteCollection = async (req, res) => {
   try {
-    // Check user authentication + artist role
-    if (!req.user || !req.user.isArtist) {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
         code: 403,
         status: "fail",
@@ -408,8 +419,12 @@ const deleteCollection = async (req, res) => {
       });
     }
 
-    // Verwijder collectie
-    await collection.deleteOne();
+    await Collection.deleteOne({ _id: id });
+
+    // delte cover image from Cloudinary
+    if (collection.coverImage && collection.coverImage.fileName) {
+      await deleteFromCloudinary(collection.coverImage.fileName);
+    }
 
     return res.status(200).json({
       code: 200,
