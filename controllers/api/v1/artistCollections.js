@@ -579,6 +579,64 @@ const addObjects = async (req, res) => {
   }
 };
 
+const togglePublish = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
+      return res.status(403).json({
+        code: 403,
+        status: "fail",
+        message: "Forbidden: Only artists can toggle publish status.",
+      });
+    }
+
+    const { id } = req.params;
+
+    // Find the collection by ID and ensure it belongs to the current user
+    const collection = await Collection.findOne({
+      _id: id,
+      createdBy: req.user._id,
+    });
+
+    if (!collection) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Collection not found or access denied.",
+      });
+    }
+
+    // Toggle the isPublished field
+    collection.isPublished = !collection.isPublished;
+    await collection.save();
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: {
+        collection: collection,
+      },
+    });
+  } catch (error) {
+    console.error("Error toggling publish status:", error);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Error toggling publish status.",
+    });
+  }
+};
+
 module.exports = {
   create,
   index,
@@ -586,4 +644,5 @@ module.exports = {
   update,
   destroy,
   addObjects,
+  togglePublish,
 };

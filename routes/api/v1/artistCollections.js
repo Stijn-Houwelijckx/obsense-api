@@ -60,4 +60,10 @@ router.delete(
   artistCollectionController.destroy
 );
 
+router.patch(
+  "/:id/toggle-publish",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  artistCollectionController.togglePublish
+);
+
 module.exports = router;
