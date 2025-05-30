@@ -429,42 +429,30 @@ const deleteCollection = async (req, res) => {
 
 const updateCollection = async (req, res) => {
   try {
-    // Check user authentication + artist role
-    if (!req.user || !req.user.isArtist) {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
         code: 403,
         status: "fail",
-        message: "Forbidden: Only artists can update collections.",
+        message: "Forbidden: Only artists can add objects to collections.",
       });
     }
 
     const { id } = req.params;
+    const { title, description, city, price, genres } = req.body;
 
-    // Parse input data (moet client side als JSON gestuurd worden)
-    // Bijvoorbeeld via Content-Type: application/json
-    const {
-      type,
-      title,
-      description,
-      city,
-      price,
-      genres,
-      isActive,
-      isPublished,
-      maxObjects,
-      // etc. voeg toe wat je wil updaten
-    } = req.body;
-
-    // Valideer verplichte velden (indien nodig)
-    if (type && !["tour", "exposition"].includes(type.toLowerCase())) {
-      return res.status(400).json({
-        code: 400,
-        status: "fail",
-        message: "Invalid collection type.",
-      });
-    }
-
-    if (title && (title.length < 1 || title.length > 35)) {
+    // Validation for title, description, price
+    if (title.length < 1 || title.length > 35) {
       return res.status(400).json({
         code: 400,
         status: "fail",
@@ -480,18 +468,16 @@ const updateCollection = async (req, res) => {
       });
     }
 
-    if (price !== undefined) {
-      const priceValue = Number(price);
-      if (priceValue < 0 || !Number.isInteger(priceValue)) {
-        return res.status(400).json({
-          code: 400,
-          status: "fail",
-          message: "Price must be a non-negative integer.",
-        });
-      }
+    const priceValue = Number(price);
+    if (price < 0 || !Number.isInteger(priceValue)) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "Price must be a non-negative integer.",
+      });
     }
 
-    // Check genres bestaan als genres zijn opgegeven
+    // Check if the genres id's exist in the database
     if (genres && genres.length > 0) {
       const genreIds = await Genre.find({ _id: { $in: genres } }).distinct(
         "_id"
@@ -519,18 +505,14 @@ const updateCollection = async (req, res) => {
       });
     }
 
-    // Update velden indien meegegeven
-    if (type) collection.type = type.toLowerCase();
-    if (title) collection.title = title;
-    if (description !== undefined) collection.description = description;
-    if (city) collection.city = city;
-    if (price !== undefined) collection.price = Number(price);
-    if (genres) collection.genres = genres;
-    if (isActive !== undefined) collection.isActive = isActive;
-    if (isPublished !== undefined) collection.isPublished = isPublished;
-    if (maxObjects !== undefined) collection.maxObjects = maxObjects;
+    // Update collection fields
+    collection.title = title;
+    collection.description = description || "No description"; // Default to "No description"
+    collection.city = city;
+    collection.price = priceValue; // Ensure price is a number
+    collection.genres = genres || []; // Allow empty genres
 
-    // Opslaan
+    // Save the updated collection
     const updatedCollection = await collection.save();
 
     return res.status(200).json({
