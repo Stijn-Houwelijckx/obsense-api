@@ -121,6 +121,19 @@ const save = async (req, res) => {
         origin,
       });
 
+      // Check if this is the first placed object in the collection
+      const placedCount = await PlacedObject.countDocuments({
+        collectionRef: collectionId,
+      });
+      if (placedCount === 1) {
+        // Update the collection's location with the first placed object's position
+        collection.location = {
+          lat: position.lat,
+          lon: position.lon,
+        };
+        await collection.save();
+      }
+
       return res.status(201).json({
         code: 201,
         status: "success",
