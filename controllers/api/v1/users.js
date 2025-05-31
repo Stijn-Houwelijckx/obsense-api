@@ -211,42 +211,6 @@ const changeProfilePicture = async (req, res) => {
   }
 };
 
-// TODO: Remove this route & controller after testing
-
-// Get all users
-const index = async (req, res) => {
-  try {
-    const users = await User.find({});
-    if (users.length === 0) {
-      res.status(204).json({
-        code: 204,
-        status: "success",
-        message: "No users found.",
-        data: {
-          users: [],
-        },
-      });
-    } else {
-      res.status(200).json({
-        code: 200,
-        status: "success",
-        data: {
-          users: users,
-        },
-      });
-    }
-  } catch (err) {
-    res.status(500).json({
-      code: 500,
-      status: "error",
-      message: "Something went wrong. Please try again.",
-      data: {
-        details: err.message,
-      },
-    });
-  }
-};
-
 // Update the user profile
 const update = async (req, res) => {
   try {
@@ -432,7 +396,6 @@ module.exports = {
   getCurrentUser,
   changePassword,
   changeProfilePicture,
-  index,
   update,
   destroy,
   makeArtist,

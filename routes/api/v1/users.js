@@ -53,9 +53,6 @@ router.patch(
   userController.makeArtist
 );
 
-// Get all users
-router.get("/", userController.index);
-
 // Sign Up and Login routes
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
