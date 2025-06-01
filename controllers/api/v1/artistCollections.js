@@ -2,6 +2,7 @@ const Collection = require("../../../models/api/v1/Collection");
 const Object = require("../../../models/api/v1/Object");
 const Genre = require("../../../models/api/v1/Genre");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
+const deleteFromCloudinary = require("../../../utils/deleteFromCloudinary");
 
 // Controller to create a new collection
 const create = async (req, res) => {
@@ -271,6 +272,203 @@ const show = async (req, res) => {
   }
 };
 
+const update = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
+      return res.status(403).json({
+        code: 403,
+        status: "fail",
+        message: "Forbidden: Only artists can update collections.",
+      });
+    }
+
+    const data = JSON.parse(req.body.collection);
+
+    const { id } = req.params;
+    const { title, description, city, price, genres } = data.collection;
+
+    // Validation for title, description, price
+    if (title.length < 1 || title.length > 35) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "Title must be between 1 and 35 characters.",
+      });
+    }
+
+    if (description && description.length > 1000) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "Description cannot exceed 1000 characters.",
+      });
+    }
+
+    const priceValue = Number(price);
+    if (price < 0 || !Number.isInteger(priceValue)) {
+      return res.status(400).json({
+        code: 400,
+        status: "fail",
+        message: "Price must be a non-negative integer.",
+      });
+    }
+
+    // Check if the genres id's exist in the database
+    if (genres && genres.length > 0) {
+      const genreIds = await Genre.find({ _id: { $in: genres } }).distinct(
+        "_id"
+      );
+      if (genreIds.length !== genres.length) {
+        return res.status(400).json({
+          code: 400,
+          status: "fail",
+          message: "Some genres do not exist.",
+        });
+      }
+    }
+
+    // Zoek collectie, controleer eigenaar
+    const collection = await Collection.findOne({
+      _id: id,
+      createdBy: req.user._id,
+    });
+
+    if (!collection) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Collection not found or access denied.",
+      });
+    }
+
+    // --- Handle optional cover image update ---
+    if (req.file) {
+      // Delete old image from Cloudinary if it exists
+      if (collection.coverImage && collection.coverImage.fileName) {
+        await deleteFromCloudinary(collection.coverImage.fileName);
+      }
+      // Upload new image
+      const coverImageResult = await uploadToCloudinary(
+        req.file.path,
+        "coverImage",
+        req.file.originalname
+      );
+      if (!coverImageResult) {
+        return res.status(500).json({
+          code: 500,
+          status: "error",
+          message: "Error uploading cover image to Cloudinary",
+        });
+      }
+      // Update coverImage field
+      collection.coverImage = {
+        fileName: coverImageResult.public_id,
+        filePath: coverImageResult.url,
+        fileType: coverImageResult.format,
+        fileSize: coverImageResult.bytes,
+      };
+    }
+    // If no file, keep the existing coverImage
+
+    // Update collection fields
+    collection.title = title;
+    collection.description = description || "No description"; // Default to "No description"
+    collection.city = city;
+    collection.price = priceValue; // Ensure price is a number
+    collection.genres = genres || []; // Allow empty genres
+
+    // Save the updated collection
+    const updatedCollection = await collection.save();
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      data: {
+        collection: updatedCollection,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating collection:", error);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: { details: error.message },
+    });
+  }
+};
+
+const destroy = async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
+      return res.status(403).json({
+        code: 403,
+        status: "fail",
+        message: "Forbidden: Only artists can delete collections.",
+      });
+    }
+
+    const { id } = req.params;
+
+    // Zoek collectie die hoort bij ingelogde user
+    const collection = await Collection.findOne({
+      _id: id,
+      createdBy: req.user._id,
+    });
+
+    if (!collection) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Collection not found or access denied.",
+      });
+    }
+
+    await Collection.deleteOne({ _id: id });
+
+    // delte cover image from Cloudinary
+    if (collection.coverImage && collection.coverImage.fileName) {
+      await deleteFromCloudinary(collection.coverImage.fileName);
+    }
+
+    return res.status(200).json({
+      code: 200,
+      status: "success",
+      message: "Collection deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting collection:", error);
+    return res.status(500).json({
+      code: 500,
+      status: "error",
+      message: "Server error",
+      data: { details: error.message },
+    });
+  }
+};
+
 // Add object(s) to collection
 const addObjects = async (req, res) => {
   try {
@@ -383,20 +581,30 @@ const addObjects = async (req, res) => {
   }
 };
 
-const deleteCollection = async (req, res) => {
+const togglePublish = async (req, res) => {
   try {
-    // Check user authentication + artist role
-    if (!req.user || !req.user.isArtist) {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        code: 401,
+        status: "fail",
+        message: "Unauthorized",
+      });
+    }
+
+    // Find the user from the database to check if they are an artist
+    const currentUser = req.user;
+    if (!currentUser || !currentUser.isArtist) {
       return res.status(403).json({
         code: 403,
         status: "fail",
-        message: "Forbidden: Only artists can delete collections.",
+        message: "Forbidden: Only artists can toggle publish status.",
       });
     }
 
     const { id } = req.params;
 
-    // Zoek collectie die hoort bij ingelogde user
+    // Find the collection by ID and ensure it belongs to the current user
     const collection = await Collection.findOne({
       _id: id,
       createdBy: req.user._id,
@@ -410,145 +618,23 @@ const deleteCollection = async (req, res) => {
       });
     }
 
-    // Verwijder collectie
-    await collection.deleteOne();
-
-    return res.status(200).json({
-      code: 200,
-      status: "success",
-      message: "Collection deleted successfully",
-    });
-  } catch (error) {
-    console.error("Error deleting collection:", error);
-    return res.status(500).json({
-      code: 500,
-      status: "error",
-      message: "Server error",
-      data: { details: error.message },
-    });
-  }
-};
-
-const updateCollection = async (req, res) => {
-  try {
-    // Check user authentication + artist role
-    if (!req.user || !req.user.isArtist) {
-      return res.status(403).json({
-        code: 403,
-        status: "fail",
-        message: "Forbidden: Only artists can update collections.",
-      });
-    }
-
-    const { id } = req.params;
-
-    // Parse input data (moet client side als JSON gestuurd worden)
-    // Bijvoorbeeld via Content-Type: application/json
-    const {
-      type,
-      title,
-      description,
-      city,
-      price,
-      genres,
-      isActive,
-      isPublished,
-      maxObjects,
-      // etc. voeg toe wat je wil updaten
-    } = req.body;
-
-    // Valideer verplichte velden (indien nodig)
-    if (type && !["tour", "exposition"].includes(type.toLowerCase())) {
-      return res.status(400).json({
-        code: 400,
-        status: "fail",
-        message: "Invalid collection type.",
-      });
-    }
-
-    if (title && (title.length < 1 || title.length > 35)) {
-      return res.status(400).json({
-        code: 400,
-        status: "fail",
-        message: "Title must be between 1 and 35 characters.",
-      });
-    }
-
-    if (description && description.length > 1000) {
-      return res.status(400).json({
-        code: 400,
-        status: "fail",
-        message: "Description cannot exceed 1000 characters.",
-      });
-    }
-
-    if (price !== undefined) {
-      const priceValue = Number(price);
-      if (priceValue < 0 || !Number.isInteger(priceValue)) {
-        return res.status(400).json({
-          code: 400,
-          status: "fail",
-          message: "Price must be a non-negative integer.",
-        });
-      }
-    }
-
-    // Check genres bestaan als genres zijn opgegeven
-    if (genres && genres.length > 0) {
-      const genreIds = await Genre.find({ _id: { $in: genres } }).distinct(
-        "_id"
-      );
-      if (genreIds.length !== genres.length) {
-        return res.status(400).json({
-          code: 400,
-          status: "fail",
-          message: "Some genres do not exist.",
-        });
-      }
-    }
-
-    // Zoek collectie, controleer eigenaar
-    const collection = await Collection.findOne({
-      _id: id,
-      createdBy: req.user._id,
-    });
-
-    if (!collection) {
-      return res.status(404).json({
-        code: 404,
-        status: "fail",
-        message: "Collection not found or access denied.",
-      });
-    }
-
-    // Update velden indien meegegeven
-    if (type) collection.type = type.toLowerCase();
-    if (title) collection.title = title;
-    if (description !== undefined) collection.description = description;
-    if (city) collection.city = city;
-    if (price !== undefined) collection.price = Number(price);
-    if (genres) collection.genres = genres;
-    if (isActive !== undefined) collection.isActive = isActive;
-    if (isPublished !== undefined) collection.isPublished = isPublished;
-    if (maxObjects !== undefined) collection.maxObjects = maxObjects;
-
-    // Opslaan
-    const updatedCollection = await collection.save();
+    // Toggle the isPublished field
+    collection.isPublished = !collection.isPublished;
+    await collection.save();
 
     return res.status(200).json({
       code: 200,
       status: "success",
       data: {
-        collection: updatedCollection,
+        collection: collection,
       },
     });
   } catch (error) {
-    console.error("Error updating collection:", error);
+    console.error("Error toggling publish status:", error);
     return res.status(500).json({
       code: 500,
       status: "error",
-      message: "Server error",
-      data: { details: error.message },
+      message: "Error toggling publish status.",
     });
   }
 };
@@ -557,7 +643,8 @@ module.exports = {
   create,
   index,
   show,
+  update,
+  destroy,
   addObjects,
-  deleteCollection,
-  updateCollection,
+  togglePublish,
 };

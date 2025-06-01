@@ -126,7 +126,9 @@ const indexByCreator = async (req, res) => {
       });
     }
 
-    const userObjects = await Object.find({ uploadedBy: req.user._id }).lean();
+    const userObjects = await Object.find({ uploadedBy: req.user._id })
+      .sort({ createdAt: -1 })
+      .lean();
 
     if (!userObjects || userObjects.length === 0) {
       return res.status(204).json({
@@ -338,7 +340,7 @@ const update = async (req, res) => {
   }
 };
 
-const deleteObject = async (req, res) => {
+const destroy = async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -544,7 +546,7 @@ module.exports = {
   indexByCollection,
   show,
   update,
-  deleteObject,
+  destroy,
   setThumbnail,
   deleteThumbnail,
 };

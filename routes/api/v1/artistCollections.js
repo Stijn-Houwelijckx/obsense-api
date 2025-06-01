@@ -45,17 +45,25 @@ router.patch(
 router.put(
   "/:id",
   passport.authenticate("jwt", { session: false }),
-  artistCollectionController.updateCollection
+  validateFile(
+    /\.jpg$|\.jpeg$|\.png$/i,
+    ["image/jpeg", "image/png"],
+    1 * 1024 * 1024,
+    "coverImage"
+  ),
+  artistCollectionController.update
 );
 
 router.delete(
   "/:id",
   passport.authenticate("jwt", { session: false }),
-  (req, res, next) => {
-    console.log("DELETE route triggered for id:", req.params.id);
-    next();
-  },
-  artistCollectionController.deleteCollection
+  artistCollectionController.destroy
+);
+
+router.patch(
+  "/:id/toggle-publish",
+  passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
+  artistCollectionController.togglePublish
 );
 
 module.exports = router;
