@@ -178,7 +178,9 @@ const index = async (req, res) => {
 
     // Find collections for the artist and select only necessary fields
     const collections = await Collection.find({ createdBy: req.user._id })
-      .select("_id type title coverImage isPublished isActive location") // Select necessary fields
+      .select(
+        "_id type title city coverImage objects isPublished isActive location"
+      ) // Select necessary fields
       .sort({ createdAt: -1 }); // Optional: Sort by creation date (newest first)
 
     if (!collections || collections.length === 0) {
