@@ -1,4 +1,8 @@
 const User = require("../../../models/api/v1/User");
+const Collection = require("../../../models/api/v1/Collection");
+const Object = require("../../../models/api/v1/Object");
+const PlacedObject = require("../../../models/api/v1/PlacedObject");
+const Purchase = require("../../../models/api/v1/Purchase");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
 const deleteFromCloudinary = require("../../../utils/deleteFromCloudinary");
 
@@ -328,6 +332,16 @@ const destroy = async (req, res) => {
         message: "User not found",
       });
     }
+
+    // Delete all collections and objects associated with the user
+    await PlacedObject.deleteMany({
+      collectionRef: {
+        $in: await Collection.find({ createdBy: req.user._id }).distinct("_id"),
+      },
+    });
+    await Object.deleteMany({ uploadedBy: req.user._id });
+    await Collection.deleteMany({ createdBy: req.user._id });
+    await Purchase.deleteMany({ user: req.user._id });
 
     res.status(200).json({
       code: 200,
