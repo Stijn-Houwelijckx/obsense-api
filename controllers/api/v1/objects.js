@@ -1,5 +1,6 @@
 const Object = require("../../../models/api/v1/Object");
 const Collection = require("../../../models/api/v1/Collection");
+const PlacedObject = require("../../../models/api/v1/PlacedObject");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
 const deleteFromCloudinary = require("../../../utils/deleteFromCloudinary");
 
@@ -366,6 +367,15 @@ const destroy = async (req, res) => {
         message: "Object not found or access denied.",
       });
     }
+
+    // Remove the placed objects associated with this object
+    await PlacedObject.deleteMany({ object: objectId });
+
+    // Remove the object from any collections it might be in
+    await Collection.updateMany(
+      { objects: objectId },
+      { $pull: { objects: objectId } }
+    );
 
     // Delete the file from Cloudinary
     try {
