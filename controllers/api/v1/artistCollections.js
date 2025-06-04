@@ -1,6 +1,7 @@
 const Collection = require("../../../models/api/v1/Collection");
 const Object = require("../../../models/api/v1/Object");
 const PlacedObject = require("../../../models/api/v1/PlacedObject");
+const Purchase = require("../../../models/api/v1/Purchase");
 const Genre = require("../../../models/api/v1/Genre");
 const uploadToCloudinary = require("../../../utils/uploadToCloudinary");
 const deleteFromCloudinary = require("../../../utils/deleteFromCloudinary");
@@ -449,6 +450,8 @@ const destroy = async (req, res) => {
 
     // Delete all PlacedObjects associated with this collection
     await PlacedObject.deleteMany({ collectionRef: id });
+    // Delete all purchases associated with this collection
+    await Purchase.deleteMany({ collectionRef: id });
 
     await Collection.deleteOne({ _id: id });
 
