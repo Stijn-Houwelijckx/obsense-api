@@ -552,23 +552,8 @@ const addObjects = async (req, res) => {
       });
     }
 
-    // Remove duplicates from the objectIds array
-    const uniqueObjectIds = objectIds.filter(
-      (id) => !collection.objects.includes(id)
-    );
-
-    // If there are no unique IDs to add, return a message
-    if (uniqueObjectIds.length === 0) {
-      return res.status(400).json({
-        code: 400,
-        status: "fail",
-        message:
-          "No new objects to add. All objects are already in the collection.",
-      });
-    }
-
-    // Add the unique objects to the collection
-    collection.objects.push(...uniqueObjectIds);
+    // Replace the objects array
+    collection.objects = objectIds;
     await collection.save();
 
     return res.status(200).json({

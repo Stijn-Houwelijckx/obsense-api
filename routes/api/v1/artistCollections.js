@@ -36,7 +36,7 @@ router.get(
 );
 
 // Route to add objects to a collection
-router.patch(
+router.put(
   "/:id/add-objects",
   passport.authenticate("jwt", { session: false }), // Ensure the user is authenticated
   artistCollectionController.addObjects // Controller to add objects to a collection
