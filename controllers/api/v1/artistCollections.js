@@ -544,7 +544,7 @@ const addObjects = async (req, res) => {
     }
 
     // Check if the collection has reached its maxObjects limit
-    if (collection.objects.length + objectIds.length > collection.maxObjects) {
+    if (objectIds.length > collection.maxObjects) {
       return res.status(400).json({
         code: 400,
         status: "fail",
