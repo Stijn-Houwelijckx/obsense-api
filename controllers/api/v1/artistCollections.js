@@ -502,11 +502,25 @@ const addObjects = async (req, res) => {
     const { objectIds } = req.body.objects;
 
     // Ensure objectIds is an array
-    if (!Array.isArray(objectIds) || objectIds.length === 0) {
+    if (!Array.isArray(objectIds)) {
       return res.status(400).json({
         code: 400,
         status: "fail",
         message: "Please provide an array of object IDs.",
+      });
+    }
+
+    // Find the collection by ID and ensure it belongs to the current user
+    const collection = await Collection.findOne({
+      _id: collectionId,
+      createdBy: req.user._id,
+    });
+
+    if (!collection) {
+      return res.status(404).json({
+        code: 404,
+        status: "fail",
+        message: "Collection not found or access denied.",
       });
     }
 
@@ -526,20 +540,6 @@ const addObjects = async (req, res) => {
         data: {
           missingObjectIds: missingIds,
         },
-      });
-    }
-
-    // Find the collection by ID and ensure it belongs to the current user
-    const collection = await Collection.findOne({
-      _id: collectionId,
-      createdBy: req.user._id,
-    });
-
-    if (!collection) {
-      return res.status(404).json({
-        code: 404,
-        status: "fail",
-        message: "Collection not found or access denied.",
       });
     }
 
