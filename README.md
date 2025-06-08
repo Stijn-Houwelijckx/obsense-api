@@ -26,7 +26,7 @@ Obsense API is a RESTful backend for managing users, artists, collections, 3D ob
 1. **Clone the repository**
 
    ```
-   git clone <repo-url>
+   git clone git@github.com:Stijn-Houwelijckx/obsense-api.git
    cd Obsense-API
    ```
 
